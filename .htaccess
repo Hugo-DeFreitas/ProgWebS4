@@ -1,0 +1,6 @@
+#HTACCESS FOR CODEIGNITER 3
+## Projet de JS pour le S4 ##
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?/$1 [L]
