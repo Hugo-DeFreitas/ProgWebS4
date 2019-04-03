@@ -83,3 +83,9 @@ defined('EXIT_USER_INPUT')     OR define('EXIT_USER_INPUT', 7); // invalid user 
 defined('EXIT_DATABASE')       OR define('EXIT_DATABASE', 8); // database error
 defined('EXIT__AUTO_MIN')      OR define('EXIT__AUTO_MIN', 9); // lowest automatically-assigned error code
 defined('EXIT__AUTO_MAX')      OR define('EXIT__AUTO_MAX', 125); // highest automatically-assigned error code
+
+/*
+ * Constantes utiles au projet.
+ */
+define('SPOTIFY_CLIENT_ID','eeaddf56b042465ebd15c51792d4c44c');
+define('SPOTIFY_CLIENT_SECRET','81f619f196e7451ca40beaa81577e063');
