@@ -25,7 +25,16 @@ class Artist extends Super_Controller
      */
     public function get_top_artists()
     {
-        $topArtistsData = (object) $this->get_api_request('chart.gettopartists');
-        var_dump($topArtistsData);
+        echo $this->get_api_request('chart.gettopartists');
+    }
+
+    /**
+     * Permet d'obtenir les tops artistes en fonction des pays.
+     *
+     * @param $country
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+        public function get_top_artists_by_country($country){
+        echo $this->get_api_request('geo.gettopartists&country='.$country);
     }
 }
