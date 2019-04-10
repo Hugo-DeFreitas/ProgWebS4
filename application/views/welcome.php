@@ -122,7 +122,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Se connecter <i class="fa fa-user"></i></h5>
+                    <h5 class="modal-title">Se connecter <i class="fa fa-user"></i></h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -131,7 +131,7 @@
                     <form name="signInForm" id="sign-in-form">
                         <div class="form-group">
                             <label for="sign-in-login">Login</label>
-                            <input name="signInLogin" type="text" class="form-control" id="sign-in-login" placeholder="PatrickSébastien">
+                            <input name="signInLogin" type="text" class="form-control" id="sign-in-login" placeholder="Votre nom d'utilisateur.">
                         </div>
                         <div class="form-group">
                             <label for="sign-in-password">Mot de passe</label>
@@ -143,6 +143,63 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
                             <button type="submit" id="sign-in-submit-btn" class="btn btn-primary">Connexion</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="sign-up-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">S'inscrire <i class="fa fa-user"></i></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form name="signUpForm" id="sign-up-form">
+                        <div class="form-group">
+                            <label for="sign-up-firstname">Nom</label>
+                            <input name="signUpFirstName" type="text" class="form-control" id="sign-up-firstname" placeholder="Tom">
+                        </div>
+                        <div class="form-group">
+                            <label for="sign-up-lastname">Nom</label>
+                            <input name="signUpLastName" type="text" class="form-control" id="sign-up-lastname" placeholder="Cruise">
+                        </div>
+                        <div class="form-group">
+                            <label for="sign-up-login">Login <strong>*</strong></label>
+                            <input name="signUpLogin" type="text" class="form-control" id="sign-up-login" placeholder="Votre nom d'utilisateur unique.">
+                        </div>
+                        <div class="form-group">
+                            <label for="sign-up-password">Mot de passe <strong>*</strong></label>
+                            <input name="signUpPassword" type="password" class="form-control" id="sign-up-password" placeholder="Mot de passe">
+                        </div>
+                        <div class="form-group">
+                            <label for="sign-up-password-confirmation">Confirmation <strong>*</strong></label>
+                            <input name="signUpPasswordConfirmation" type="password" class="form-control" id="sign-in-password-confirmation" placeholder="Confirmer votre mot de passe">
+                        </div>
+                        <div class="form-group">
+                            <label for="sign-up-user-bio">Bio</label>
+                            <textarea name="signUpUserBio" class="form-control" id="sign-up-user-bio" rows="3" placeholder="Une courte description?"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="sign-up-user-pp">Bio</label>
+                            <input name="signUpUserPP" class="form-control" id="sign-up-user-pp" placeholder="L'URL de votre photo de profil.">
+                        </div>
+                        <div id="callback-sign-up-message">
+                            <!-- Zone remplie en cas d'erreur lors de la connexion-->
+                        </div>
+                        <div class="modal-footer">
+                            <div class="text-left">
+                                <p class="text-danger">
+                                    <small><strong>*</strong>, champs obligatoires</small>
+                                </p>
+                            </div>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                            <button type="submit" id="sign-up-submit-btn" class="btn btn-primary">S'inscrire</button>
                         </div>
                     </form>
                 </div>
@@ -173,6 +230,9 @@
         }
 
         $(document).ready(function () {
+            /**
+             * Gestion de la connexion en Ajax
+             */
             $('#sign-in-form').on('submit', function(e) {
                 //On empêche l'envoi du formulaire vers le serveur
                 e.preventDefault();
@@ -195,11 +255,11 @@
                             callBackDiv.show();
                             callBackDiv.html(
                                 "<div class=\"alert alert-danger\" role=\"alert\">" +
-                                    responseObject.error +
+                                responseObject.error +
                                 "</div>");
-                                setTimeout(function () {
-                                    callBackDiv.hide();
-                                },1500);
+                            setTimeout(function () {
+                                callBackDiv.hide();
+                            },1500);
                         }
                     })
                     .fail(function() {
@@ -213,6 +273,81 @@
                         },1500);
                     });
             });
+
+            /**
+             * Gestion de l'inscription en Ajax.
+             */
+            $('#sign-up-form').on('submit', function(e) {
+                //On empêche l'envoi du formulaire vers le serveur
+                e.preventDefault();
+                //On récupère les données du formulaire dans un objet JSON.
+                let signUpObject = transformFormDataIntoObject(this);
+                let callBackDiv  = $('#callback-sign-up-message');
+                if(signUpObject.hasOwnProperty('signUpLogin') && signUpObject['signUpLogin'] === ""){
+                    callBackDiv.show();
+                    callBackDiv.html(
+                        "<div class=\"alert alert-danger\" role=\"alert\">" +
+                            "Votre login unique est nécessaire. Veuillez renseigner le champs." +
+                        "</div>");
+                    setTimeout(function () {
+                        callBackDiv.hide();
+                    },2000);
+                }
+                else {
+                    if(signUpObject.hasOwnProperty('signUpPassword') && signUpObject['signUpPassword'] === ""){
+                        callBackDiv.show();
+                        callBackDiv.html(
+                            "<div class=\"alert alert-danger\" role=\"alert\">" +
+                            "Pour des questions de sécurité, votre password est nécessaire. Veuillez renseigner le champs." +
+                            "</div>");
+                        setTimeout(function () {
+                            callBackDiv.hide();
+                        },2000);
+                    }
+                    else {
+                        console.log()
+                        $.ajax( {
+                            url : "User/try_inscription/",
+                            method : 'POST',
+                            data : {
+                                signUpData : signUpObject
+                            }
+                        })
+                            .done(function(response) {
+                                console.log(response);
+                                let responseObject = JSON.parse(response);
+                                if(responseObject.success){
+                                    $('#sign-up-modal').modal('hide');
+                                    $("#landingSlider").fadeOut();
+                                    $("#landingDescription").fadeOut();
+                                }
+                                else {
+                                    callBackDiv.show();
+                                    callBackDiv.html(
+                                        "<div class=\"alert alert-danger\" role=\"alert\">" +
+                                        responseObject.error +
+                                        "</div>");
+                                    setTimeout(function () {
+                                        callBackDiv.hide();
+                                    },1500);
+                                }
+                            })
+                            .fail(function(){
+                                callBackDiv.show();
+                                callBackDiv.html(
+                                    "<div class=\"alert alert-warning\" role=\"alert\">" +
+                                    'Erreur interne. Veuillez contactez un développeur de la plateforme.'+
+                                    "</div>");
+                                setTimeout(function () {
+                                    callBackDiv.hide();
+                                },1500);
+                            });
+                    }
+                }
+
+            });
+
+
         });
     </script>
 </body>

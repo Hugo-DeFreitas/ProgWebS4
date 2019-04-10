@@ -4,6 +4,7 @@ class User_Model extends Super_Model
 {
     const PRIMARY_KEY   = 'id';
     const TABLE         = 'user';
+    const DEFAULT_PP    = 'https://image.flaticon.com/icons/png/512/306/306473.png';
 
     public $id;
     public $first_name;
