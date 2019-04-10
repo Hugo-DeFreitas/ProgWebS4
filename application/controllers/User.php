@@ -51,6 +51,7 @@ class User extends Super_Controller
         if($concernedUser){
             if($concernedUser->password == $mdp){
                 $result->success = true;
+                $this->login($concernedUser);
             }
             else {
                 $result->error = 'Mot de passe incorrect.';
@@ -105,6 +106,7 @@ class User extends Super_Controller
                 $insertRoleForUser->user_id = $newUser->id;
                 if(@$insertRoleForUser->save()){
                     $result->success = true;
+                    $this->login($newUser);
                 }
                 else{
                     $result->error = "Erreur interne. L'inscription est momentanément indisponible.";
@@ -119,5 +121,39 @@ class User extends Super_Controller
             $result->error = 'Ce login est déjà utilisé.';
         }
         echo json_encode($result);
+    }
+
+    public function get_user_div($userLogin,$userPassword){
+    }
+
+    /**
+     * Check les coookies pour établir si un utilisateur est loggé ou non.
+     */
+    public function is_connected(){
+        $cookieLogin = get_cookie('login');
+        $cookieUserID = get_cookie('user_id');
+        if($cookieLogin && $cookieUserID){
+            $testedUser = $this->user_model->get($cookieUserID);
+            echo $testedUser ? isset($testedUser->login) && $testedUser->login == $cookieLogin : false ;
+        }
+        else {
+            echo false;
+        }
+    }
+
+    /**
+     * Déconnecte un utilisateur
+     */
+    public function logout(){
+        $this->input->cookie();
+    }
+
+    /**
+     * Connecte un utilisateur
+     * @param User_Model $user
+     */
+    private function login(User_Model $user){
+        $this->input->set_cookie('login',$user->login);
+        $this->input->set_cookie('user_id',$user->id);
     }
 }

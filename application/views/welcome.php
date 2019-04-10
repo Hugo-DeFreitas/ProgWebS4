@@ -67,6 +67,10 @@
         </div>
     </div>
 
+    <div id="user-div">
+
+    </div>
+
 
 
     <!-- Footer -->
@@ -229,6 +233,10 @@
             return signInObject;
         }
 
+        function displayUser(userData){
+
+        }
+
         $(document).ready(function () {
             /**
              * Gestion de la connexion en Ajax
@@ -239,39 +247,50 @@
                 //On récupère les données du formulaire dans un objet JSON.
                 let signInObject = transformFormDataIntoObject(this);
                 let callBackDiv  = $('#callback-sign-in-message');
-                $.ajax( {
-                    url : "User/try_connection/" + signInObject.signInLogin + "/" +signInObject.signInPassword,
-                    method : 'POST'
-                })
-                    .done(function(response) {
-                        console.log(response);
-                        let responseObject = JSON.parse(response);
-                        if(responseObject.success){
-                            $('#sign-in-modal').modal('hide');
-                            $("#landingSlider").fadeOut();
-                            $("#landingDescription").fadeOut();
-                        }
-                        else {
-                            callBackDiv.show();
-                            callBackDiv.html(
-                                "<div class=\"alert alert-danger\" role=\"alert\">" +
-                                responseObject.error +
-                                "</div>");
-                            setTimeout(function () {
-                                callBackDiv.hide();
-                            },1500);
-                        }
-                    })
-                    .fail(function() {
-                        callBackDiv.show();
-                        callBackDiv.html(
-                            "<div class=\"alert alert-warning\" role=\"alert\">" +
-                            'Erreur interne. Veuillez contactez un développeur de la plateforme.'+
-                            "</div>");
-                        setTimeout(function () {
-                            callBackDiv.hide();
-                        },1500);
-                    });
+                if(signInObject.hasOwnProperty('signInLogin') && signInObject['signInLogin'] === "") {
+                    displayAlertInDiv("Votre login unique est nécessaire. Veuillez renseigner le champs.",callBackDiv,2000);
+                }
+                else {
+                    if(signInObject.hasOwnProperty('signInPassword') && signInObject['signInPassword'] === "") {
+                        displayAlertInDiv("Pour des questions de sécurité, votre password est nécessaire. Veuillez renseigner le champs."
+                            ,callBackDiv,2000);
+                    }
+                    else {
+                        $.ajax( {
+                            url : "User/try_connection/" + signInObject.signInLogin + "/" +signInObject.signInPassword,
+                            method : 'POST'
+                        })
+                            .done(function(response) {
+                                console.log(response);
+                                let responseObject = JSON.parse(response);
+                                if(responseObject.success){
+                                    $('#sign-in-modal').modal('hide');
+                                    $("#landingSlider").fadeOut();
+                                    $("#landingDescription").fadeOut();
+                                }
+                                else {
+                                    callBackDiv.show();
+                                    callBackDiv.html(
+                                        "<div class=\"alert alert-danger\" role=\"alert\">" +
+                                        responseObject.error +
+                                        "</div>");
+                                    setTimeout(function () {
+                                        callBackDiv.hide();
+                                    },1500);
+                                }
+                            })
+                            .fail(function() {
+                                callBackDiv.show();
+                                callBackDiv.html(
+                                    "<div class=\"alert alert-warning\" role=\"alert\">" +
+                                    'Erreur interne. Veuillez contactez un développeur de la plateforme.'+
+                                    "</div>");
+                                setTimeout(function () {
+                                    callBackDiv.hide();
+                                },1500);
+                            });
+                    }
+                }
             });
 
             /**
@@ -346,6 +365,17 @@
                 }
 
             });
+
+            function displayAlertInDiv(message,callBackDiv,duration) {
+                callBackDiv.show();
+                callBackDiv.html(
+                    "<div class=\"alert alert-danger\" role=\"alert\">" +
+                    message +
+                    "</div>");
+                setTimeout(function () {
+                    callBackDiv.hide();
+                },duration);
+            }
 
 
         });
