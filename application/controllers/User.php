@@ -6,8 +6,10 @@
  * @property User_Model             $user_model
  * @property User_has_role_Model    $user_has_role_model
  * @property Role_Model             $role_model
+ *
  * @property CI_DB_driver $db
  * @property  CI_Input $input
+ * @property CI_Session $session
  */
 class User extends Super_Controller
 {
@@ -17,6 +19,7 @@ class User extends Super_Controller
         $this->load_models('user_model',
             'user_has_role_model',
             'role_model');
+        $this->load->library('session');
     }
 
     public function get_user($login,$mdp){
@@ -130,6 +133,9 @@ class User extends Super_Controller
      * Check les coookies pour établir si un utilisateur est loggé ou non.
      */
     public function is_connected(){
+        if($this->session->get_userdata()){
+
+        }
         $cookieLogin = get_cookie('login');
         $cookieUserID = get_cookie('user_id');
         if($cookieLogin && $cookieUserID){
@@ -145,7 +151,8 @@ class User extends Super_Controller
      * Déconnecte un utilisateur
      */
     public function logout(){
-        $this->input->cookie();
+        $this->session->unset_userdata('user_connected');
+        redirect(base_url('Welcome/get_welcome_non_connected_view_html'));
     }
 
     /**
@@ -153,6 +160,7 @@ class User extends Super_Controller
      * @param User_Model $user
      */
     private function login(User_Model $user){
+        $this->session->set_userdata('user_connected',$user);
         $this->input->set_cookie('login',$user->login);
         $this->input->set_cookie('user_id',$user->id);
     }

@@ -1,3 +1,11 @@
+<?php
+if(isset($session_data['user_connected'])){
+    $userConnected = $session_data['user_connected'];
+}
+else{
+    $userConnected = null;
+}
+?>
 <!doctype html>
 <html lang="fr">
     <head>
@@ -26,50 +34,78 @@
                     <line x1="16.62" y1="12" x2="10.88" y2="21.94"></line>
                 </svg>
             </a>
-            <a href="#sign-in-modal" data-toggle="modal" data-target="#sign-in-modal" class="py-2 d-none d-md-inline-block">Se Connecter</a>
-            <a href="#sign-up-modal" data-toggle="modal" data-target="#sign-up-modal" class="py-2 d-none d-md-inline-block">S'inscrire</a>
+            <?php
+            if($userConnected) {
+                ?>
+                <a href="" id="logout-link" class="py-2 d-none d-md-inline-block">
+                    Déconnexion
+                </a>
+                <?php
+            }
+            else{
+                ?>
+                <a href="#sign-in-modal" data-toggle="modal" data-target="#sign-in-modal" class="py-2 d-none d-md-inline-block">
+                    Se Connecter
+                </a>
+                <a href="#sign-up-modal" data-toggle="modal" data-target="#sign-up-modal" class="py-2 d-none d-md-inline-block">
+                    S'inscrire
+                </a>
+                <?php
+            }
+            ?>
         </div>
     </nav>
+    <?php
+    /**
+     * Affichage ou non de l'accueil, et de la présentation du site
+     */
+    if($userConnected) {
+        ?>
+        <div id="user-div">
 
-    <div id="landingSlider">
-        <div id="landing-message-vegas" class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center">
-            <div class="col-md-5 p-lg-5 mx-auto my-5 text-light">
-                <h1 class="display-4 font-weight-normal">Bienvenue sur <strong>Apollon</strong>.</h1>
-                <p class="lead font-weight-normal">Le créateur de playlist ultime.</p>
-                <a data-toggle="modal" data-target="#about-modal" class="btn btn-outline-secondary" href="#about">En savoir plus</a>
-            </div>
         </div>
-    </div>
-    <div id="landingDescription">
-        <div class="d-md-flex flex-md-equal w-100 my-md-3 pl-md-3">
-            <div class="bg-dark mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center text-white overflow-hidden">
-                <div class="my-3 py-3">
-                    <h2 class="display-5">Retrouver vos artistes préférés</h2>
-                    <p class="lead">
-                        Connectez-vous et cherchez de nouveaux titres, créer des playlists.<br>
-                        Toutes les fonctionnalités sur une seule page.
-                    </p>
-                </div>
-                <div id="apollon-description-1" class="bg-light box-shadow mx-auto custom-box">
-                </div>
-            </div>
-            <div class="bg-light mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
-                <div class="my-3 p-3">
-                    <h2 class="display-5">Explorer une infinité de titres</h2>
-                    <p class="lead">
-                        Des millions de titres, à la portée de tous. <br>
-                        Un moteur de recherche efficace et puissant.
-                    </p>
-                </div>
-                <div id="apollon-description-2" class="bg-dark box-shadow mx-auto custom-box">
+        <?php
+    }
+    else{
+        ?>
+        <div id="landingSlider">
+            <div id="landing-message-vegas" class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center">
+                <div class="col-md-5 p-lg-5 mx-auto my-5 text-light">
+                    <h1 class="display-4 font-weight-normal">Bienvenue sur <strong>Apollon</strong>.</h1>
+                    <p class="lead font-weight-normal">Le créateur de playlist ultime.</p>
+                    <a data-toggle="modal" data-target="#about-modal" class="btn btn-outline-secondary" href="#about">En savoir plus</a>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div id="user-div">
-
-    </div>
+        <div id="landingDescription">
+            <div class="d-md-flex flex-md-equal w-100 my-md-3 pl-md-3">
+                <div class="bg-dark mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center text-white overflow-hidden">
+                    <div class="my-3 py-3">
+                        <h2 class="display-5">Retrouver vos artistes préférés</h2>
+                        <p class="lead">
+                            Connectez-vous et cherchez de nouveaux titres, créer des playlists.<br>
+                            Toutes les fonctionnalités sur une seule page.
+                        </p>
+                    </div>
+                    <div id="apollon-description-1" class="bg-light box-shadow mx-auto custom-box">
+                    </div>
+                </div>
+                <div class="bg-light mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
+                    <div class="my-3 p-3">
+                        <h2 class="display-5">Explorer une infinité de titres</h2>
+                        <p class="lead">
+                            Des millions de titres, à la portée de tous. <br>
+                            Un moteur de recherche efficace et puissant.
+                        </p>
+                    </div>
+                    <div id="apollon-description-2" class="bg-dark box-shadow mx-auto custom-box">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
+    }
+    ?>
 
 
 
@@ -218,20 +254,10 @@
     <script src="<?php echo base_url('assets/js/vegas/vegas.min.js')?>"></script>
     <!-- Scripts inclus pour la vue -->
     <script src="<?php echo base_url('assets/js/scripts-vue/config-vegas.js')?>"></script>
+    <script src="<?php echo base_url('assets/js/scripts-vue/malibrairie.js')?>"></script>
 
     <script>
-        /**
-         * Renvoie un objet JSON à partir d'un formulaire, qui contiendra la valeur des inputs.
-         * @param formData
-         */
-        function transformFormDataIntoObject(formData){
-            let signInObject = {};
-            let signInFormData = new FormData(formData);
-            for (const [key, value]  of signInFormData.entries()) {
-                signInObject[key] = value;
-            }
-            return signInObject;
-        }
+
 
         function displayUser(userData){
 
@@ -242,6 +268,7 @@
              * Gestion de la connexion en Ajax
              */
             $('#sign-in-form').on('submit', function(e) {
+
                 //On empêche l'envoi du formulaire vers le serveur
                 e.preventDefault();
                 //On récupère les données du formulaire dans un objet JSON.
@@ -252,8 +279,7 @@
                 }
                 else {
                     if(signInObject.hasOwnProperty('signInPassword') && signInObject['signInPassword'] === "") {
-                        displayAlertInDiv("Pour des questions de sécurité, votre password est nécessaire. Veuillez renseigner le champs."
-                            ,callBackDiv,2000);
+                        displayAlertInDiv("Pour des questions de sécurité, votre password est nécessaire. Veuillez renseigner le champs.",callBackDiv,2000);
                     }
                     else {
                         $.ajax( {
@@ -269,25 +295,11 @@
                                     $("#landingDescription").fadeOut();
                                 }
                                 else {
-                                    callBackDiv.show();
-                                    callBackDiv.html(
-                                        "<div class=\"alert alert-danger\" role=\"alert\">" +
-                                        responseObject.error +
-                                        "</div>");
-                                    setTimeout(function () {
-                                        callBackDiv.hide();
-                                    },1500);
+                                    displayAlertInDiv(responseObject.error,callBackDiv,1500);
                                 }
                             })
                             .fail(function() {
-                                callBackDiv.show();
-                                callBackDiv.html(
-                                    "<div class=\"alert alert-warning\" role=\"alert\">" +
-                                    'Erreur interne. Veuillez contactez un développeur de la plateforme.'+
-                                    "</div>");
-                                setTimeout(function () {
-                                    callBackDiv.hide();
-                                },1500);
+                                displayWarningInDiv('Erreur interne. Veuillez contactez un développeur de la plateforme.',callBackDiv,1500);
                             });
                     }
                 }
@@ -303,28 +315,13 @@
                 let signUpObject = transformFormDataIntoObject(this);
                 let callBackDiv  = $('#callback-sign-up-message');
                 if(signUpObject.hasOwnProperty('signUpLogin') && signUpObject['signUpLogin'] === ""){
-                    callBackDiv.show();
-                    callBackDiv.html(
-                        "<div class=\"alert alert-danger\" role=\"alert\">" +
-                            "Votre login unique est nécessaire. Veuillez renseigner le champs." +
-                        "</div>");
-                    setTimeout(function () {
-                        callBackDiv.hide();
-                    },2000);
+                    displayAlertInDiv("Votre login unique est nécessaire. Veuillez renseigner le champs.",callBackDiv,2000);
                 }
                 else {
                     if(signUpObject.hasOwnProperty('signUpPassword') && signUpObject['signUpPassword'] === ""){
-                        callBackDiv.show();
-                        callBackDiv.html(
-                            "<div class=\"alert alert-danger\" role=\"alert\">" +
-                            "Pour des questions de sécurité, votre password est nécessaire. Veuillez renseigner le champs." +
-                            "</div>");
-                        setTimeout(function () {
-                            callBackDiv.hide();
-                        },2000);
+                        displayAlertInDiv("Pour des questions de sécurité, votre password est nécessaire. Veuillez renseigner le champs.",callBackDiv,2000);
                     }
                     else {
-                        console.log()
                         $.ajax( {
                             url : "User/try_inscription/",
                             method : 'POST',
@@ -341,43 +338,16 @@
                                     $("#landingDescription").fadeOut();
                                 }
                                 else {
-                                    callBackDiv.show();
-                                    callBackDiv.html(
-                                        "<div class=\"alert alert-danger\" role=\"alert\">" +
-                                        responseObject.error +
-                                        "</div>");
-                                    setTimeout(function () {
-                                        callBackDiv.hide();
-                                    },1500);
+                                    displayAlertInDiv(responseObject.error,callBackDiv,1500);
                                 }
                             })
                             .fail(function(){
-                                callBackDiv.show();
-                                callBackDiv.html(
-                                    "<div class=\"alert alert-warning\" role=\"alert\">" +
-                                    'Erreur interne. Veuillez contactez un développeur de la plateforme.'+
-                                    "</div>");
-                                setTimeout(function () {
-                                    callBackDiv.hide();
-                                },1500);
+                                displayAlertInDiv('Erreur interne. Veuillez contactez un développeur de la plateforme.',callBackDiv,1500);
                             });
                     }
                 }
 
             });
-
-            function displayAlertInDiv(message,callBackDiv,duration) {
-                callBackDiv.show();
-                callBackDiv.html(
-                    "<div class=\"alert alert-danger\" role=\"alert\">" +
-                    message +
-                    "</div>");
-                setTimeout(function () {
-                    callBackDiv.hide();
-                },duration);
-            }
-
-
         });
     </script>
 </body>

@@ -6,7 +6,7 @@
 class Super_Controller extends CI_Controller
 {
 
-    protected $data = array();
+    protected $data;
     private $main_page;
     public function getMainPage(){return $this->main_page;}
     public function setMainPage($main_page){$this->main_page = $main_page;}
@@ -14,6 +14,7 @@ class Super_Controller extends CI_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->data = new stdClass();
     }
 
     /**
