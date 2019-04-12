@@ -250,6 +250,7 @@ else{
 <!-- Scripts inclus pour la vue -->
 <script src="<?php echo base_url('assets/js/scripts-vue/config-vegas.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/malibrairie.js')?>"></script>
+<script src="<?php echo base_url('assets/js/scripts-vue/dom-functions.js')?>"></script>
 
 <script>
 
@@ -259,23 +260,11 @@ else{
         //Habillage de la page en fonction de la présence du connexion ou non.
         preparePage();
 
-
-
-
-
-
-
-
-
-
-
-
-
         /**
          * Gestion  de la déconnexion en Ajax
          */
         $('#logout-link').click(function (e) {
-            e.preventDefault();
+            logout();
         });
 
 
@@ -283,84 +272,14 @@ else{
          * Gestion de la connexion en Ajax
          */
         $('#sign-in-form').on('submit', function(e) {
-
-            //On empêche l'envoi du formulaire vers le serveur
-            e.preventDefault();
-            //On récupère les données du formulaire dans un objet JSON.
-            let signInObject = transformFormDataIntoObject(this);
-            let callBackDiv  = $('#callback-sign-in-message');
-            if(signInObject.hasOwnProperty('signInLogin') && signInObject['signInLogin'] === "") {
-                displayAlertInDiv("Votre login unique est nécessaire. Veuillez renseigner le champs.",callBackDiv,2000);
-            }
-            else {
-                if(signInObject.hasOwnProperty('signInPassword') && signInObject['signInPassword'] === "") {
-                    displayAlertInDiv("Pour des questions de sécurité, votre password est nécessaire. Veuillez renseigner le champs.",callBackDiv,2000);
-                }
-                else {
-                    $.ajax( {
-                        url : "User/try_connection/" + signInObject.signInLogin + "/" +signInObject.signInPassword,
-                        method : 'POST'
-                    })
-                        .done(function(response) {
-                            console.log(response);
-                            if(response.connection){
-                                $('#sign-in-modal').modal('hide');
-                                $("#landingSlider").fadeOut();
-                                $("#landingDescription").fadeOut();
-                            }
-                            else {
-                                displayAlertInDiv(responseObject.error,callBackDiv,1500);
-                            }
-                        })
-                        .fail(function() {
-                            displayWarningInDiv('Erreur interne. Veuillez contactez un développeur de la plateforme.',callBackDiv,1500);
-                        });
-                }
-            }
+            signIn(e,this);
         });
 
         /**
          * Gestion de l'inscription en Ajax.
          */
         $('#sign-up-form').on('submit', function(e) {
-            //On empêche l'envoi du formulaire vers le serveur
-            e.preventDefault();
-            //On récupère les données du formulaire dans un objet JSON.
-            let signUpObject = transformFormDataIntoObject(this);
-            let callBackDiv  = $('#callback-sign-up-message');
-            if(signUpObject.hasOwnProperty('signUpLogin') && signUpObject['signUpLogin'] === ""){
-                displayAlertInDiv("Votre login unique est nécessaire. Veuillez renseigner le champs.",callBackDiv,2000);
-            }
-            else {
-                if(signUpObject.hasOwnProperty('signUpPassword') && signUpObject['signUpPassword'] === ""){
-                    displayAlertInDiv("Pour des questions de sécurité, votre password est nécessaire. Veuillez renseigner le champs.",callBackDiv,2000);
-                }
-                else {
-                    $.ajax( {
-                        url : "User/try_inscription/",
-                        method : 'POST',
-                        data : {
-                            signUpData : signUpObject
-                        }
-                    })
-                        .done(function(response) {
-                            console.log(response);
-                            let responseObject = JSON.parse(response);
-                            if(responseObject.success){
-                                $('#sign-up-modal').modal('hide');
-                                $("#landingSlider").fadeOut();
-                                $("#landingDescription").fadeOut();
-                            }
-                            else {
-                                displayAlertInDiv(responseObject.error,callBackDiv,1500);
-                            }
-                        })
-                        .fail(function(){
-                            displayAlertInDiv('Erreur interne. Veuillez contactez un développeur de la plateforme.',callBackDiv,1500);
-                        });
-                }
-            }
-
+            signUp(e,this);
         });
     });
 </script>

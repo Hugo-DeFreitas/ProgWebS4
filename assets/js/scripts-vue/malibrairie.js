@@ -2,26 +2,29 @@
  * Permet de savoir si l'utilisateur est connecté ou non.
  */
 function isConnected(){
-    $.ajax( {
-        url : "User/is_connected/",
-        method : 'POST'
-    })
-        .done(function(response) {
-            //la variable "response" est un bool, renvoyé par le serveur. A la moindre erreur, le serveur renvoie faux.
-            console.log(response);
-            if(response.connection){
-                console.log("L'utilisateur est connecté.");
-                return true;
-            }
-            else {
-                console.log("L'utilisateur n'est pas connecté.");
-                return false;
-            }
-
+    return new Promise(function (resolve, reject) {
+        $.ajax( {
+            url : "User/is_connected/",
+            method : 'POST',
         })
-        .fail(function(){
-            alert('erreur');
-        });
+            .done(function(response) {
+                //la variable "response" est un bool, renvoyé par le serveur. A la moindre erreur, le serveur renvoie faux.
+                console.log(response);
+                if(response.connection){
+                    console.log("L'utilisateur est connecté.");
+                    resolve(true);
+                }
+                else {
+                    console.log("L'utilisateur n'est pas connecté.");
+                    resolve(false);
+                }
+
+            })
+            .fail(function(){
+                alert('Erreur interne critique.');
+                resolve(false);
+            });
+    });
 }
 
 /**
@@ -37,50 +40,7 @@ function transformFormDataIntoObject(formData){
     return signInObject;
 }
 
-/**
- * Met une alerte de danger dans une div donnée.
- *
- * @param message
- * @param callBackDiv
- * @param duration
- */
-function displayAlertInDiv(message,callBackDiv,duration) {
-    callBackDiv.show();
-    callBackDiv.html(
-        "<div class=\"alert alert-danger\" role=\"alert\">" +
-        message +
-        "</div>");
-    setTimeout(function () {
-        callBackDiv.hide();
-    },duration);
-}
-function displayWarningInDiv(message,callBackDiv,duration) {
-    callBackDiv.show();
-    callBackDiv.html(
-        "<div class=\"alert alert-warning\" role=\"alert\">" +
-        message +
-        "</div>");
-    setTimeout(function () {
-        callBackDiv.hide();
-    },duration);
-}
-function logout() {
-    $.ajax( {
-        url : "User/logout/",
-        method : 'POST'
-    })
-        .done(function(response) {
-            console.log(response);
-        })
-        .fail(function(){
-            alert('erreur');
-        });
-}
 
-function setHeaderForConnectedUser() {
-    let header = $('#header');
-
-}
 
 /**
  * Prépare la page en fonction de la connexion ou non de l'utilisateur.
@@ -92,14 +52,108 @@ function preparePage() {
     let body = $('body');
     let headerForConnectedUser      = $('#header-for-connected-user');
     let headerForNotConnectedUser   = $('#header-for-not-connected-user');
+    isConnected().then(function (connection) {
+        changeHeader(connection);
+    });
+}
 
+/**
+ * Gestion de l'inscription
+ * @param event
+ * @param domElement
+ */
+function signUp(event,domElement) {
+    //On empêche l'envoi du formulaire vers le serveur
+    event.preventDefault();
+    //On récupère les données du formulaire dans un objet JSON.
+    let signUpObject = transformFormDataIntoObject(domElement);
+    let callBackDiv  = $('#callback-sign-up-message');
+    if(signUpObject.hasOwnProperty('signUpLogin') && signUpObject['signUpLogin'] === ""){
+        displayAlertInDiv("Votre login unique est nécessaire. Veuillez renseigner le champs.",callBackDiv,2000);
+    }
+    else {
+        if(signUpObject.hasOwnProperty('signUpPassword') && signUpObject['signUpPassword'] === ""){
+            displayAlertInDiv("Pour des questions de sécurité, votre password est nécessaire. Veuillez renseigner le champs.",callBackDiv,2000);
+        }
+        else {
+            $.ajax( {
+                url : "User/try_inscription/",
+                method : 'POST',
+                data : {
+                    signUpData : signUpObject
+                }
+            })
+                .done(function(response) {
+                    console.log(response);
+                    if(response.success){
+                        $('#sign-up-modal').modal('hide');
+                        preparePage();
+                    }
+                    else {
+                        displayAlertInDiv(response.error,callBackDiv,1500);
+                    }
+                })
+                .fail(function(){
+                    displayAlertInDiv('Erreur interne. Veuillez contactez un développeur de la plateforme.',callBackDiv,1500);
+                });
+        }
+    }
+}
 
-    if(isConnected()){
-        headerForConnectedUser.show();
-        headerForNotConnectedUser.addClass('forcehide');
+/**
+ * Gestion de la connexion
+ * @param event
+ * @param domElement
+ */
+function signIn(event,domElement) {
+    //On empêche l'envoi du formulaire vers le serveur
+    event.preventDefault();
+    //On récupère les données du formulaire dans un objet JSON.
+    let signInObject = transformFormDataIntoObject(domElement);
+    let callBackDiv  = $('#callback-sign-in-message');
+    if(signInObject.hasOwnProperty('signInLogin') && signInObject['signInLogin'] === "") {
+        displayAlertInDiv("Votre login unique est nécessaire. Veuillez renseigner le champs.",callBackDiv,2000);
     }
-    else{
-        headerForNotConnectedUser.show();
-        headerForConnectedUser.addClass('forcehide');
+    else {
+        if(signInObject.hasOwnProperty('signInPassword') && signInObject['signInPassword'] === "") {
+            displayAlertInDiv("Pour des questions de sécurité, votre password est nécessaire. Veuillez renseigner le champs.",callBackDiv,2000);
+        }
+        else {
+            $.ajax( {
+                url : "User/try_connection/" + signInObject.signInLogin + "/" +signInObject.signInPassword,
+                method : 'POST'
+            })
+                .done(function(response) {
+                    console.log(response);
+                    if(response.connection){
+                        $('#sign-in-modal').modal('hide');
+                        preparePage();
+                    }
+                    else {
+                        displayAlertInDiv(response.error,callBackDiv,1500);
+                    }
+                })
+                .fail(function() {
+                    displayWarningInDiv('Erreur interne. Veuillez contactez un développeur de la plateforme.',callBackDiv,1500);
+                });
+        }
     }
+}
+
+/**
+ * Gestion de la déconnexion
+ */
+function logout() {
+    console.log('coucou');
+    $.ajax( {
+        url : "User/logout/",
+        method : 'POST'
+    })
+        .done(function(response) {
+            preparePage();
+            console.log(response);
+        })
+        .fail(function(){
+            alert('erreur');
+        });
 }
