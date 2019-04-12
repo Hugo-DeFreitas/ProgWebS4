@@ -50,3 +50,7 @@
 }
 
 .overflow-hidden { overflow: hidden; }
+
+.forcehide {
+  display: none !important;
+}

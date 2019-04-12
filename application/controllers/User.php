@@ -7,9 +7,6 @@
  * @property User_has_role_Model    $user_has_role_model
  * @property Role_Model             $role_model
  *
- * @property CI_DB_driver $db
- * @property  CI_Input $input
- * @property CI_Session $session
  */
 class User extends Super_Controller
 {
@@ -38,7 +35,7 @@ class User extends Super_Controller
         else{
             $result->error = 'Utilisateur inexistant.';
         }
-        echo json_encode($result);
+        outp($result);
     }
 
     /**
@@ -49,11 +46,11 @@ class User extends Super_Controller
      */
     public function try_connection($login,$mdp){
         $result = new stdClass();
-        $result->success = false;
+        $result->connection = false;
         $concernedUser = $this->user_model->find_with_param(User_Model::LOGIN,$login);
         if($concernedUser){
             if($concernedUser->password == $mdp){
-                $result->success = true;
+                $result->connection = true;
                 $this->login($concernedUser);
             }
             else {
@@ -63,7 +60,7 @@ class User extends Super_Controller
         else{
             $result->error = 'Utilisateur inexistant.';
         }
-        echo json_encode($result);
+        $this->send_output_for_rest_api($result);
     }
 
     /**
@@ -78,10 +75,6 @@ class User extends Super_Controller
 
     /**
      * WebService d'inscription sur la plateforme.
-     *
-     * @param $login
-     * @param $password
-     * @param $confirmedPassword
      */
     public function try_inscription(){
         $postData = (object) ($this->input->post('signUpData'));
@@ -123,36 +116,36 @@ class User extends Super_Controller
         else{
             $result->error = 'Ce login est déjà utilisé.';
         }
-        echo json_encode($result);
-    }
-
-    public function get_user_div($userLogin,$userPassword){
+        $this->send_output_for_rest_api($result);
     }
 
     /**
      * Check les coookies pour établir si un utilisateur est loggé ou non.
      */
     public function is_connected(){
-        if($this->session->get_userdata()){
+        $result = new stdClass();
+        $result->connection = false;
 
+        if($this->isConnected()){
+            $result->connection = true;
+            $this->send_output_for_rest_api($result);
         }
-        $cookieLogin = get_cookie('login');
-        $cookieUserID = get_cookie('user_id');
-        if($cookieLogin && $cookieUserID){
-            $testedUser = $this->user_model->get($cookieUserID);
-            echo $testedUser ? isset($testedUser->login) && $testedUser->login == $cookieLogin : false ;
-        }
-        else {
-            echo false;
-        }
+        $this->send_output_for_rest_api($result);
     }
 
     /**
      * Déconnecte un utilisateur
      */
     public function logout(){
-        $this->session->unset_userdata('user_connected');
-        redirect(base_url('Welcome/get_welcome_non_connected_view_html'));
+        $result = new stdClass();
+        $result->deconnection = false;
+        if($this->isConnected()){
+            $sessionData = (object) $this->session->get_userdata();
+            $result->user_deconnected = $sessionData->user_connected;
+            $result->deconnection = true;
+            $this->session->unset_userdata('user_connected');
+        }
+        $this->send_output_for_rest_api($result);
     }
 
     /**
@@ -163,5 +156,27 @@ class User extends Super_Controller
         $this->session->set_userdata('user_connected',$user);
         $this->input->set_cookie('login',$user->login);
         $this->input->set_cookie('user_id',$user->id);
+    }
+
+    /**
+     * Fonction membre privée, qui est le véritable de test de la connection d'un utilisateur,
+     * en allant regarder dans les variables de session.
+     *
+     * @return bool
+     */
+    private function isConnected(){
+        $sessionData = (object) ($this->session->get_userdata());
+        if(isset($sessionData->user_connected) && isset($sessionData->user_connected->id)){
+            $testedUser = $this->user_model->get($sessionData->user_connected->id);
+            if($testedUser) {
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
     }
 }

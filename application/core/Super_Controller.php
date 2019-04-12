@@ -2,6 +2,11 @@
 
 /**
  * Class Super_Controller
+ *
+ * @property CI_DB_driver $db
+ * @property  CI_Input $input
+ * @property CI_Output $output
+ * @property CI_Session $session
  */
 class Super_Controller extends CI_Controller
 {
@@ -47,4 +52,12 @@ class Super_Controller extends CI_Controller
         }
     }
 
+    /**
+     * Prépare le statut d'un retour JSON Ajax
+     */
+    protected function send_output_for_rest_api($objectOrArray){
+        $this->output->set_content_type('application/json')
+            ->set_status_header(200)
+            ->set_output(json_encode($objectOrArray));
+    }
 }

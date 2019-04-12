@@ -11,6 +11,6 @@ class Track extends Super_Controller
     }
 
     public function search_track($track_searched){
-        echo $this->get_api_request('track.search&track='.$track_searched);
+        $this->send_output_for_rest_api($this->get_api_request('track.search&track='.$track_searched));
     }
 }
