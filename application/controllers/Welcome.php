@@ -1,4 +1,8 @@
 <?php
+
+use MusicBrainz\Supplement\Lookup\ArtistFields;
+use MusicBrainz\Value\MBID;
+
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
@@ -25,5 +29,5 @@ class Welcome extends Super_Controller {
 	{
 	    $this->data->session_data = $this->session->get_userdata();
 	    $this->load->view('welcome',$this->data);
-	}
+    }
 }

@@ -157,3 +157,27 @@ function logout() {
             alert('erreur');
         });
 }
+
+function getTopArtists() {
+    $.ajax({
+        url : 'Artist/get_top_artists/',
+        dataType : 'json'
+    }).done((artists) => {
+        let artistsList = $('<ul/>');
+        //Pour chaque artiste reçus depuis le controller, on rajoute une div.
+        artists.artists.artist.forEach(function (artist) {
+            let currentArtistElement = $('<li/>');
+            let currentArtistElementImage = $('<img >');
+            currentArtistElementImage.attr('src',artist.image[3]['#text']);
+
+            currentArtistElement.html(artist.name);
+            currentArtistElement.append(currentArtistElementImage);
+            artistsList.append(currentArtistElement);
+            console.log(artist);
+            //let artistsDiv = $('#topArtists').append();
+        });
+        $('#topArtists').append(artistsList);
+    }).fail((result) => {
+        console.log('Une erreur est survenue dans la récupération des TopArtists du moment.');
+    });
+}

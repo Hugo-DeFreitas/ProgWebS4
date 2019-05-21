@@ -1,5 +1,9 @@
 <?php
 
+use GuzzleHttp\Client;
+use MusicBrainz\HttpAdapter\GuzzleHttpAdapter;
+use MusicBrainz\MusicBrainz;
+
 /**
  * Class Super_Controller
  *
@@ -12,6 +16,7 @@ class Super_Controller extends CI_Controller
 {
 
     protected $data;
+    public $music_brainz;
     private $main_page;
     public function getMainPage(){return $this->main_page;}
     public function setMainPage($main_page){$this->main_page = $main_page;}
@@ -20,6 +25,11 @@ class Super_Controller extends CI_Controller
     {
         parent::__construct();
         $this->data = new stdClass();
+        $guzzleHttpAdapter = new GuzzleHttpAdapter(new Client);
+        $this->music_brainz       = new MusicBrainz($guzzleHttpAdapter);
+        $this->music_brainz->config()
+            ->setUsername(MUSICBRAINZ_LOGIN)
+            ->setPassword(MUSICBRAINZ_PWD);
     }
 
     /**
@@ -53,11 +63,45 @@ class Super_Controller extends CI_Controller
     }
 
     /**
-     * Prépare le statut d'un retour JSON Ajax
+     * Exécute une requête HTTP de type GET vers une API musicale.
+     * @param $suburl
+     * @return bool|\Psr\Http\Message\StreamInterface
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function get_mb_api_request($suburl){
+        try {
+            $client = new \GuzzleHttp\Client();
+            $url = BASE_URL_MB_API.$suburl.'?inc=aliases&fmt=json';
+            $response = $client->request('GET', $url);
+
+            if($response->getStatusCode() == 200){
+                return $response->getBody()->getContents();
+            }
+            else {
+                return false;
+            }
+        }
+        catch (Exception $e){
+            return false;
+        }
+
+    }
+
+    /**
+     * Prépare le statut d'un retour JSON Ajax et fais un echo.
      */
     protected function send_output_for_rest_api($objectOrArray){
-        $this->output->set_content_type('application/json')
-            ->set_status_header(200)
-            ->set_output(json_encode($objectOrArray));
+        $this->output->set_content_type('application/json');
+        $this->output->set_header('Cache-Control: no-cache, must-revalidate');
+        $this->output->set_header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        $this->output->set_header('Content-type: application/json');
+        if(is_array($objectOrArray) || is_object($objectOrArray)){
+            $this->output->set_output(json_encode($objectOrArray));
+        }
+        else{
+            //Vraisemblablement on a déjà un JSON
+            $this->output->set_output($objectOrArray);
+        }
+        return;
     }
 }

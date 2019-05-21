@@ -88,6 +88,9 @@ defined('EXIT__AUTO_MAX')      OR define('EXIT__AUTO_MAX', 125); // highest auto
  * Constantes utiles au projet.
  */
 define('PROJECT_NAME','Apollon');
+define('MUSICBRAINZ_LOGIN','Hugo-DeFreitas');
+define('MUSICBRAINZ_PWD','Ch0c0lat1711');
 define('LAST_FM_API_KEY','2f590316d3bccbb17589aa9af3bb85c2');
 define('LAST_FM_SECRET_KEY','a6361c184d481199d07e1b6902c06cf6');
 define('BASE_URL_LAST_FM_API','http://ws.audioscrobbler.com/2.0/');
+define('BASE_URL_MB_API','http://musicbrainz.org/ws/2/');

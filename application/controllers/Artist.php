@@ -18,6 +18,10 @@ class Artist extends Super_Controller
             'role_model');
     }
 
+    public function search_artist_by_mbid($mbid){
+        $this->send_output_for_rest_api($this->get_mb_api_request('artist/'.$mbid));
+    }
+
 
     /**
      * Permet de rechercher un id unique d'artiste sur l'API MusicXMatch
