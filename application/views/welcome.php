@@ -25,7 +25,7 @@ else{
 
 <!-- DEBUT DU HEADER -->
 <nav id="header" class="site-header sticky-top py-1">
-    <div id="header-for-not-connected-user" class="container d-flex flex-column flex-md-row justify-content-between">
+    <div id="header-for-not-connected-user" class="container d-flex flex-column flex-md-row justify-content-between forcehide">
         <a class="py-2" href="#">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="d-block mx-auto">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -44,7 +44,7 @@ else{
             S'inscrire
         </a>
     </div>
-    <div id="header-for-connected-user" class="container d-flex flex-column flex-md-row justify-content-between">
+    <div id="header-for-connected-user" class="container d-flex flex-column flex-md-row justify-content-between forcehide">
         <a class="py-2" href="#">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="d-block mx-auto">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -99,6 +99,13 @@ else{
             </div>
             <div id="apollon-description-2" class="bg-dark box-shadow mx-auto custom-box">
             </div>
+        </div>
+    </div>
+</div>
+<div id="topArtists">
+    <div id="landing-top-artists-vegas" class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center">
+        <div class="col-md-5 p-lg-5 mx-auto my-5 text-light">
+            <h1 id="topArtistHeading" class="display-4 font-weight-normal"></h1>
         </div>
     </div>
 </div>
@@ -259,6 +266,7 @@ else{
     $(document).ready(function () {
         //Habillage de la page en fonction de la présence du connexion ou non.
         preparePage();
+        getTopArtists();
 
         /**
          * Gestion  de la déconnexion en Ajax

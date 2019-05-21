@@ -3,11 +3,9 @@
  * @param isConnected, un boolean.
  */
 function changeHeader(isConnected) {
-    let header                      = $('#header');
     let headerForConnectedUser      = $('#header-for-connected-user');
     let headerForNotConnectedUser   = $('#header-for-not-connected-user');
 
-    header.addClass('forcehide');
     if(isConnected){
         console.log("Changement de header en mode utilisateur connecté.");
         headerForConnectedUser.removeClass('forcehide');
@@ -18,7 +16,6 @@ function changeHeader(isConnected) {
         headerForNotConnectedUser.removeClass('forcehide');
         headerForConnectedUser.addClass('forcehide');
     }
-    header.removeClass('forcehide');
 }
 
 
@@ -49,3 +46,4 @@ function displayWarningInDiv(message,callBackDiv,duration) {
         callBackDiv.hide();
     },duration);
 }
+
