@@ -1,6 +1,5 @@
 <?php
 
-
 if(isset($session_data['user_connected'])){
     $userConnected = $session_data['user_connected'];
 }
@@ -104,8 +103,9 @@ else{
 </div>
 <div id="topArtists">
     <div id="landing-top-artists-vegas" class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center">
+        <h2 id="topArtistHeading" class="left">Artistes du moment</h2>
         <div class="col-md-5 p-lg-5 mx-auto my-5 text-light">
-            <h1 id="topArtistHeading" class="display-4 font-weight-normal"></h1>
+
         </div>
     </div>
 </div>

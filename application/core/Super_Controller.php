@@ -4,6 +4,8 @@ use GuzzleHttp\Client;
 use MusicBrainz\HttpAdapter\GuzzleHttpAdapter;
 use MusicBrainz\MusicBrainz;
 
+header('Access-Control-Allow-Origin: *');
+header("Access-Control-Allow-Methods: GET, OPTIONS");
 /**
  * Class Super_Controller
  *
@@ -24,6 +26,8 @@ class Super_Controller extends CI_Controller
     public function __construct()
     {
         parent::__construct();
+        header('Access-Control-Allow-Origin: *');
+        header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
         $this->data = new stdClass();
         $guzzleHttpAdapter = new GuzzleHttpAdapter(new Client);
         $this->music_brainz       = new MusicBrainz($guzzleHttpAdapter);
@@ -71,7 +75,7 @@ class Super_Controller extends CI_Controller
     public function get_mb_api_request($suburl){
         try {
             $client = new \GuzzleHttp\Client();
-            $url = BASE_URL_MB_API.$suburl.'?inc=aliases&fmt=json';
+            $url = BASE_URL_MB_API.$suburl.'?inc=url-rels&fmt=json';
             $response = $client->request('GET', $url);
 
             if($response->getStatusCode() == 200){
@@ -96,11 +100,27 @@ class Super_Controller extends CI_Controller
         $this->output->set_header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
         $this->output->set_header('Content-type: application/json');
         if(is_array($objectOrArray) || is_object($objectOrArray)){
-            $this->output->set_output(json_encode($objectOrArray));
+            if($objectOrArray){
+                $this->output->set_output(json_encode($objectOrArray,JSON_PRETTY_PRINT));
+            }
+            else{
+                $resultError = new stdClass();
+                $resultError->message = 'Le WebService n\'a rien à retourner.';
+                $resultError->result = 'error';
+                $this->output->set_output(json_encode($resultError,JSON_PRETTY_PRINT));
+            }
         }
         else{
-            //Vraisemblablement on a déjà un JSON
-            $this->output->set_output($objectOrArray);
+            if($objectOrArray){
+                //Vraisemblablement on a déjà un JSON
+                $this->output->set_output($objectOrArray);
+            }
+            else{
+                $resultError = new stdClass();
+                $resultError->message = 'Le WebService n\'a rien à retourner.';
+                $resultError->result = 'error';
+                $this->output->set_output(json_encode($resultError,JSON_PRETTY_PRINT));
+            }
         }
         return;
     }

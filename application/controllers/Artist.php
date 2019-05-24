@@ -19,7 +19,8 @@ class Artist extends Super_Controller
     }
 
     public function search_artist_by_mbid($mbid){
-        $this->send_output_for_rest_api($this->get_mb_api_request('artist/'.$mbid));
+        $result = $this->get_mb_api_request('artist/'.$mbid);
+        $this->send_output_for_rest_api($result);
     }
 
 
@@ -38,7 +39,28 @@ class Artist extends Super_Controller
      * @param $country
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-        public function get_top_artists_by_country($country){
+    public function get_top_artists_by_country($country){
         $this->send_output_for_rest_api($this->get_api_request('geo.gettopartists&country='.$country));
+    }
+
+    public function get_artist_mbid_by_name($name){
+        $resultFromLastFMAPI = json_decode($this->get_api_request('artist.search&artist='.$name));
+        return ($resultFromLastFMAPI->results->artistmatches->artist[0]->mbid) ? ($resultFromLastFMAPI->results->artistmatches->artist[0]->mbid) :false;
+    }
+
+    public function search_artist_by_name($name){
+        $result = new stdClass();
+        $mbid = $this->get_artist_mbid_by_name($name);
+        if(!$mbid) {
+            $result->error = "L'artiste " . $name . " n'a pas de MBID.";
+            $this->send_output_for_rest_api($result);
+            return;
+        }
+        $this->search_artist_by_mbid($mbid);
+    }
+
+    public function get_artist_info($artistName){
+        $artistName = urldecode($artistName);
+        $this->send_output_for_rest_api($this->get_api_request('artist.getinfo&info='.$artistName));
     }
 }
