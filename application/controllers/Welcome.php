@@ -28,6 +28,7 @@ class Welcome extends Super_Controller {
     public function index()
 	{
 	    $this->data->session_data = $this->session->get_userdata();
+	    $this->data->user_model = unserialize(serialize($this->data->session_data['user_connected']));
 	    $this->data->is_connected = $this->is_connected;
 	    $this->load->view('welcome',$this->data);
     }

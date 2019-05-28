@@ -178,8 +178,12 @@ function searchForTracks(trackName) {
             method : 'POST',
         })
             .done(function(tracks) {
-                resolve(tracks.results.trackmatches);
-
+                if(tracks){
+                    resolve(tracks.results.trackmatches);
+                }
+                else {
+                    resolve(false);
+                }
             })
             .fail(function(){
                 resolve(false);
@@ -195,7 +199,17 @@ function searchForTracks(trackName) {
  */
 function displaySearchResultsInDiv(searchResults,div) {
     let resultsTracksDiv = div;
-    tracksResults.track.forEach((track) => {
+    resultsTracksDiv.empty();
+    console.log(searchResults);
+    console.log(searchResults.length);
+    if(!searchResults || searchResults.length === 0){
+        console.log("Aucun résultat reçu.");
+        let errorMessage = "<div class='lead text-center'><p class='text-warning'>Aucun résultat connu pour cette recherche.</p></div>";
+        div.append(errorMessage);
+        return;
+    }
+
+    searchResults.track.forEach((track) => {
         console.log(track);
         //Nouveaux résultats.
         let newTrackResult = $("<a/>");

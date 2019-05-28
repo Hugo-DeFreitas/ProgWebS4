@@ -48,3 +48,11 @@ function hideLoader() {
     body.css('padding-right', '');
     loader.hide();
 }
+
+/**
+ * Fonction permettant d'afficher un loader dans une div
+ */
+function showLoaderInDiv(div) {
+
+    $('#loader').modal('show');
+}

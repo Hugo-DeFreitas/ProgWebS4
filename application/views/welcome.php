@@ -1,7 +1,10 @@
 <?php
 
-if(isset($session_data['user_connected'])){
-    $userConnected = $session_data['user_connected'];
+if(isset($user_model)){
+    /**
+     * @var User_Model $userConnected
+     */
+    $userConnected = $user_model;
 }
 else{
     $userConnected = null;
@@ -140,15 +143,28 @@ else{
             </div>
         </div>
     </div>
-    <?php } ?>
-    <div id="topArtists">
-        <div id="landing-top-artists-vegas" class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center">
-            <h2 id="topArtistHeading" class="left">Artistes du moment</h2>
-            <div class="col-md-5 p-lg-5 mx-auto my-5 text-light">
-
+    <?php }
+    /**
+     * Corps de la page quand l'utilisateur est connecté.
+     */
+    if($userConnected){
+        ?>
+        <div id="welcomeUserConnected">
+            <div id="landing-top-artists-vegas" class="position-relative overflow-hidden m-md-3 text-left">
+                <h2>Bienvenue <?= $userConnected->first_name?> <?= $userConnected->last_name?>.</h2>
             </div>
         </div>
-    </div>
+        <div id="topArtists">
+            <div id="landing-top-artists-vegas" class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center">
+                <h2 id="topArtistHeading" class="left">Artistes du moment</h2>
+                <div class="col-md-5 p-lg-5 mx-auto my-5 text-light">
+
+                </div>
+            </div>
+        </div>
+    <?php
+    }
+    ?>
 </div>
 
 
@@ -339,9 +355,19 @@ else{
         });
 
         $("#search-for-tracks").on('input',function () {
-            let newVal = $(this).val();
-            searchForTracks(newVal).then(function (tracksResults) {
-                displaySearchResultsInDiv(tracksResults,$('#results-search-for-tracks'));
+            //On met un timer pour ne pas faire de requêtes AJAX à chaque changement de lettres.
+            let typingTimer;
+            let doneTypingInterval = 1000;
+            $(this).keyup(function(){
+                let newVal = $(this).val();
+                clearTimeout(typingTimer);
+                if (newVal) {
+                    typingTimer = setTimeout(function () {
+                        searchForTracks(newVal).then(function (tracksResults) {
+                            displaySearchResultsInDiv(tracksResults,$('#results-search-for-tracks'));
+                        });
+                    }, doneTypingInterval);
+                }
             });
         });
     });
