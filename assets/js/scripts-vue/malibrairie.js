@@ -40,23 +40,6 @@ function transformFormDataIntoObject(formData){
     return signInObject;
 }
 
-
-
-/**
- * Prépare la page en fonction de la connexion ou non de l'utilisateur.
- */
-function preparePage() {
-    /**
-     * Tous les éléments du DOM dont on a besoin.
-     */
-    let body = $('body');
-    let headerForConnectedUser      = $('#header-for-connected-user');
-    let headerForNotConnectedUser   = $('#header-for-not-connected-user');
-    isConnected().then(function (connection) {
-        changeHeader(connection);
-    });
-}
-
 /**
  * Gestion de l'inscription
  * @param event
@@ -87,7 +70,6 @@ function signUp(event,domElement) {
                     console.log(response);
                     if(response.success){
                         $('#sign-up-modal').modal('hide');
-                        preparePage();
                     }
                     else {
                         displayAlertInDiv(response.error,callBackDiv,1500);
@@ -119,15 +101,16 @@ function signIn(event,domElement) {
             displayAlertInDiv("Pour des questions de sécurité, votre password est nécessaire. Veuillez renseigner le champs.",callBackDiv,2000);
         }
         else {
-            $.ajax( {
+            showLoader();
+            $.ajax({
                 url : "User/try_connection/" + signInObject.signInLogin + "/" +signInObject.signInPassword,
-                method : 'POST'
-            })
+                method : 'POST'})
                 .done(function(response) {
                     console.log(response);
+                    hideLoader();
                     if(response.connection){
                         $('#sign-in-modal').modal('hide');
-                        preparePage();
+                        location.reload(true);
                     }
                     else {
                         displayAlertInDiv(response.error,callBackDiv,1500);
@@ -150,7 +133,6 @@ function logout() {
         method : 'POST'
     })
         .done(function(response) {
-            preparePage();
             console.log(response);
         })
         .fail(function(){
@@ -169,7 +151,7 @@ function getTopArtists() {
             let currentArtist = $('<button type="button" class="btn btn-primary" >');
             currentArtist.html(artist.name);
             $.ajax({
-                url : 'Artist/get_artist_info/'+artist.name,
+                url : 'Artist/get_artist_info/'+artist.mbid,
                 method:'POST',
                 dataType : 'json'
             }).done((artistInfos) => {
@@ -179,5 +161,73 @@ function getTopArtists() {
         });
     }).fail((result) => {
         console.log('Une erreur est survenue dans la récupération des TopArtists du moment.');
+    });
+}
+
+/**
+ * Renvoit via Promise, les résultats d'une recherche sur un titre musical.
+ * @param trackName
+ * @returns {Promise<any>}
+ */
+function searchForTracks(trackName) {
+    let  resultsDiv = $("#results-search-for-tracks");
+    resultsDiv.empty();
+    return new Promise(function (resolve, reject) {
+        $.ajax( {
+            url : "Track/search_track/"+trackName,
+            method : 'POST',
+        })
+            .done(function(tracks) {
+                resolve(tracks.results.trackmatches);
+
+            })
+            .fail(function(){
+                resolve(false);
+                resultsDiv.empty();
+            });
+    });
+}
+
+/**
+ * Permet d'afficher les résultats d'une recherche dans une div.
+ * @param searchResults, un tableau avec les résultats attendus
+ * @param div, la div sur laquelles on append() les résultats.
+ */
+function displaySearchResultsInDiv(searchResults,div) {
+    let resultsTracksDiv = div;
+    tracksResults.track.forEach((track) => {
+        console.log(track);
+        //Nouveaux résultats.
+        let newTrackResult = $("<a/>");
+        let newTrackResultInnerContainer = $("<div>");
+        let newTrackResultHeading = $("<h5/>");
+        let newTrackResultNumberOfListeners = $("<small/>");
+        let newTrackResultArtistPart = $("<p/>");
+
+        /*
+        Configuration des nouveaux éléments HTML créés.
+         */
+        //Container principal
+        newTrackResult.attr({
+            href : "#",
+            class : "list-group-item list-group-item-action flex-column align-items-start"
+        });
+        //Container secondaire
+        newTrackResultInnerContainer.addClass("d-flex w-100 justify-content-between");
+        //Titre de l'item
+        newTrackResultHeading.addClass('mb-1');
+        newTrackResultHeading.html(track.name);
+        //Nombre d'écoutes par mois de l'artiste.
+        newTrackResultNumberOfListeners.html(track.listeners);
+        //Infos diverses
+        newTrackResultArtistPart.addClass('mb-1');
+        newTrackResultArtistPart.html(track.artist);
+
+        //On emboite les parties.
+        newTrackResultInnerContainer.append(newTrackResultHeading);
+        newTrackResultInnerContainer.append(newTrackResultNumberOfListeners);
+        newTrackResult.append(newTrackResultInnerContainer);
+        newTrackResult.append(newTrackResultArtistPart);
+        resultsTracksDiv.append(newTrackResult);
     });
 }

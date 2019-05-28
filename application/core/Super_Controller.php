@@ -20,6 +20,7 @@ class Super_Controller extends CI_Controller
     protected $data;
     public $music_brainz;
     private $main_page;
+    public $is_connected;
     public function getMainPage(){return $this->main_page;}
     public function setMainPage($main_page){$this->main_page = $main_page;}
 
@@ -123,5 +124,52 @@ class Super_Controller extends CI_Controller
             }
         }
         return;
+    }
+
+    /**
+     * Déconnecte un utilisateur
+     */
+    public function logout(){
+        $result = new stdClass();
+        $result->deconnection = false;
+        if($this->isConnected()){
+            $sessionData = (object) $this->session->get_userdata();
+            $result->user_deconnected = $sessionData->user_connected;
+            $result->deconnection = true;
+            $this->session->unset_userdata('user_connected');
+        }
+        $this->send_output_for_rest_api($result);
+    }
+
+    /**
+     * Connecte un utilisateur
+     * @param User_Model $user
+     */
+    protected function login(User_Model $user){
+        $this->session->set_userdata('user_connected',$user);
+        $this->input->set_cookie('login',$user->login);
+        $this->input->set_cookie('user_id',$user->id);
+    }
+
+    /**
+     * Fonction membre privée, qui est le véritable de test de la connection d'un utilisateur,
+     * en allant regarder dans les variables de session.
+     *
+     * @return bool
+     */
+    protected function isConnected(){
+        $sessionData = (object) ($this->session->get_userdata());
+        if(isset($sessionData->user_connected) && isset($sessionData->user_connected->id)){
+            $testedUser = $this->user_model->get($sessionData->user_connected->id);
+            if($testedUser) {
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
     }
 }

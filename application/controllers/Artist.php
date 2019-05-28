@@ -59,8 +59,13 @@ class Artist extends Super_Controller
         $this->search_artist_by_mbid($mbid);
     }
 
-    public function get_artist_info($artistName){
-        $artistName = urldecode($artistName);
-        $this->send_output_for_rest_api($this->get_api_request('artist.getinfo&info='.$artistName));
+    public function get_artist_info($mbid = false){
+        if(!$mbid){
+            $result = new stdClass();
+            $result->error = "L'artiste ne dispose pas de mbid";
+            $this->send_output_for_rest_api($result);
+            return;
+        }
+        $this->send_output_for_rest_api($this->get_api_request('artist.getinfo&mbid='.$mbid.'&lang=fr'));
     }
 }

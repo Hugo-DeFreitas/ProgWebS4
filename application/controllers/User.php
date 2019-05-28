@@ -54,11 +54,11 @@ class User extends Super_Controller
                 $this->login($concernedUser);
             }
             else {
-                $result->error = 'Mot de passe incorrect.';
+                $result->error = 'Mot de passe ou utilisateur incorrect(s).';
             }
         }
         else{
-            $result->error = 'Utilisateur inexistant.';
+            $result->error = 'Mot de passe ou utilisateur incorrect(s).';
         }
         $this->send_output_for_rest_api($result);
     }
@@ -133,50 +133,8 @@ class User extends Super_Controller
         $this->send_output_for_rest_api($result);
     }
 
-    /**
-     * Déconnecte un utilisateur
-     */
-    public function logout(){
-        $result = new stdClass();
-        $result->deconnection = false;
-        if($this->isConnected()){
-            $sessionData = (object) $this->session->get_userdata();
-            $result->user_deconnected = $sessionData->user_connected;
-            $result->deconnection = true;
-            $this->session->unset_userdata('user_connected');
-        }
-        $this->send_output_for_rest_api($result);
-    }
-
-    /**
-     * Connecte un utilisateur
-     * @param User_Model $user
-     */
-    private function login(User_Model $user){
-        $this->session->set_userdata('user_connected',$user);
-        $this->input->set_cookie('login',$user->login);
-        $this->input->set_cookie('user_id',$user->id);
-    }
-
-    /**
-     * Fonction membre privée, qui est le véritable de test de la connection d'un utilisateur,
-     * en allant regarder dans les variables de session.
-     *
-     * @return bool
-     */
-    private function isConnected(){
-        $sessionData = (object) ($this->session->get_userdata());
-        if(isset($sessionData->user_connected) && isset($sessionData->user_connected->id)){
-            $testedUser = $this->user_model->get($sessionData->user_connected->id);
-            if($testedUser) {
-                return true;
-            }
-            else{
-                return false;
-            }
-        }
-        else {
-            return false;
-        }
+    public function logout()
+    {
+        parent::logout();
     }
 }

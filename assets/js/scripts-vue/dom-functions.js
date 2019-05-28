@@ -1,25 +1,4 @@
 /**
- * Change l'état du header en fonction de la connexion ou non de l'utilisateur.
- * @param isConnected, un boolean.
- */
-function changeHeader(isConnected) {
-    let headerForConnectedUser      = $('#header-for-connected-user');
-    let headerForNotConnectedUser   = $('#header-for-not-connected-user');
-
-    if(isConnected){
-        console.log("Changement de header en mode utilisateur connecté.");
-        headerForConnectedUser.removeClass('forcehide');
-        headerForNotConnectedUser.addClass('forcehide');
-    }
-    else{
-        console.log("Changement de header en mode visiteur.");
-        headerForNotConnectedUser.removeClass('forcehide');
-        headerForConnectedUser.addClass('forcehide');
-    }
-}
-
-
-/**
  * Met une alerte de danger dans une div donnée.
  *
  * @param message
@@ -47,3 +26,25 @@ function displayWarningInDiv(message,callBackDiv,duration) {
     },duration);
 }
 
+/**
+ * Nettoie toute la page (sauf le header et le footer).
+ */
+function clearAll() {$("#main").empty();}
+
+/**
+ * Fonction permettant d'afficher le loader.
+ */
+function showLoader() {$('#loader').modal('show');}
+
+/**
+ * Fonction permettant d'enlever le loader (de force), car il s'agit d'un bug sur la librairie Bootstrap.
+ */
+function hideLoader() {
+    let loader = $("#loader");
+    let body = $('body');
+    loader.removeClass("in");
+    $(".modal-backdrop").remove();
+    body.removeClass('modal-open');
+    body.css('padding-right', '');
+    loader.hide();
+}
