@@ -50,9 +50,28 @@ function hideLoader() {
 }
 
 /**
- * Fonction permettant d'afficher un loader dans une div
+ * Fonction permettant d'afficher un loader dans une div.
  */
 function showLoaderInDiv(div) {
+    //Si un loader est déjà présent dans la page, on ne le rajoute pas.
+    if ($(".loaderDisplayedInDiv").length > 0){
+        return div;
+    }
+    let loader = '<div class="text-center loaderDisplayedInDiv">\n' +
+        '                <div class="spinner-border" role="status">\n' +
+        '                    <span class="sr-only">Loading...</span>\n' +
+        '                </div>\n' +
+        '            </div>';
+    div.after(loader);
+    return div;
+}
 
-    $('#loader').modal('show');
+/**
+ * Supprime tout loader invoqué par la fonction showLoaderInDiv(), à l'intérieur d'une div.
+ * @param div
+ * @returns {*}
+ */
+function hideLoaderInDiv(div) {
+    $(".loaderDisplayedInDiv").remove();
+    return div;
 }

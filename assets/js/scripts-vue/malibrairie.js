@@ -200,9 +200,7 @@ function searchForTracks(trackName) {
 function displaySearchResultsInDiv(searchResults,div) {
     let resultsTracksDiv = div;
     resultsTracksDiv.empty();
-    console.log(searchResults);
-    console.log(searchResults.length);
-    if(!searchResults || searchResults.length === 0){
+    if(!searchResults || searchResults.track.length === 0){
         console.log("Aucun résultat reçu.");
         let errorMessage = "<div class='lead text-center'><p class='text-warning'>Aucun résultat connu pour cette recherche.</p></div>";
         div.append(errorMessage);
@@ -210,7 +208,9 @@ function displaySearchResultsInDiv(searchResults,div) {
     }
 
     searchResults.track.forEach((track) => {
+        console.log("Track reçu:");
         console.log(track);
+
         //Nouveaux résultats.
         let newTrackResult = $("<a/>");
         let newTrackResultInnerContainer = $("<div>");
@@ -223,7 +223,7 @@ function displaySearchResultsInDiv(searchResults,div) {
          */
         //Container principal
         newTrackResult.attr({
-            href : "#",
+            href : track.url,
             class : "list-group-item list-group-item-action flex-column align-items-start"
         });
         //Container secondaire
@@ -232,7 +232,7 @@ function displaySearchResultsInDiv(searchResults,div) {
         newTrackResultHeading.addClass('mb-1');
         newTrackResultHeading.html(track.name);
         //Nombre d'écoutes par mois de l'artiste.
-        newTrackResultNumberOfListeners.html(track.listeners);
+        newTrackResultNumberOfListeners.html("Écoutes mensuelles: <strong>"+track.listeners+"</strong>");
         //Infos diverses
         newTrackResultArtistPart.addClass('mb-1');
         newTrackResultArtistPart.html(track.artist);
@@ -243,5 +243,40 @@ function displaySearchResultsInDiv(searchResults,div) {
         newTrackResult.append(newTrackResultInnerContainer);
         newTrackResult.append(newTrackResultArtistPart);
         resultsTracksDiv.append(newTrackResult);
+
+        //Traitement supplémentaire, pour récupérer plus d'infos.
+        new Promise(function (resolve, reject) {
+            //Si un titre a un mbid, cela signifie qu'on peut éventuellement aller chercher des infos supplémentaires sur celui-ci.
+            if(track.mbid){
+                $.ajax( {
+                    url : "Track/get_info/"+track.mbid,
+                    method : 'POST',
+                })
+                    .done(function(trackInfos) {
+                        if(trackInfos){
+                            console.log("Track informations :");
+                            console.log(trackInfos);
+                            resolve(trackInfos.track);
+                        }
+                        else {
+                            resolve(false);
+                        }
+                    })
+                    .fail(function(){
+                        resolve(false);
+                    });
+            }
+        }).then((trackInfos) => {
+            //Si on reçoit faux de la part de la promesse, on ne fait rien.
+            if (trackInfos){
+                let trackImage = $("<img>");
+                let trackImageURL = trackInfos.album.image[2]["#text"];
+                trackImage.attr({
+                    src : trackImageURL
+                });
+                newTrackResultHeading.before(trackImage);
+
+            }
+        });
     });
 }

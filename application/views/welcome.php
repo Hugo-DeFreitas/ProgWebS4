@@ -354,21 +354,27 @@ else{
             signUp(e,this);
         });
 
-        $("#search-for-tracks").on('input',function () {
-            //On met un timer pour ne pas faire de requêtes AJAX à chaque changement de lettres.
-            let typingTimer;
-            let doneTypingInterval = 1000;
-            $(this).keyup(function(){
-                let newVal = $(this).val();
-                clearTimeout(typingTimer);
-                if (newVal) {
-                    typingTimer = setTimeout(function () {
-                        searchForTracks(newVal).then(function (tracksResults) {
-                            displaySearchResultsInDiv(tracksResults,$('#results-search-for-tracks'));
-                        });
-                    }, doneTypingInterval);
-                }
-            });
+        //On met un timer pour ne pas faire de requêtes AJAX à chaque changement de lettres.
+        let typingTimer;
+        let timeForUserBeforeAjaxRequest = 1000;
+        $("#search-for-tracks").keyup(function(){
+            let saveContext = $(this);
+            let resultsDiv = $('#results-search-for-tracks');
+            let newVal = $(this).val();
+            clearTimeout(typingTimer);
+            //On efface les résultats précédents pour plus de clarté à chaque nouvelle valeur entrée par l'utilisateur.
+            resultsDiv.empty();
+            //On met un loader le temps de la recherche ajax.
+            showLoaderInDiv(saveContext);
+            typingTimer = setTimeout(function () {
+                //Appel Ajax qui va chercher des titres correspondants.
+                searchForTracks(newVal).then((tracksResults) => {
+                    //On cache le loader
+                    hideLoaderInDiv(saveContext);
+                    //On affiche les résultats de la recherche dans la div concernée.
+                    displaySearchResultsInDiv(tracksResults,resultsDiv);
+                });
+            }, timeForUserBeforeAjaxRequest);
         });
     });
 </script>
