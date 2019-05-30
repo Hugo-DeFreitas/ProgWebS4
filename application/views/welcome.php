@@ -53,17 +53,7 @@ else{
     <div id="header-for-connected-user"
              class="container d-flex flex-column flex-md-row justify-content-between">
             <a class="py-2" href="#">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                     class="d-block mx-auto">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="14.31" y1="8" x2="20.05" y2="17.94"></line>
-                    <line x1="9.69" y1="8" x2="21.17" y2="8"></line>
-                    <line x1="7.38" y1="12" x2="13.12" y2="2.06"></line>
-                    <line x1="9.69" y1="16" x2="3.95" y2="6.06"></line>
-                    <line x1="14.31" y1="16" x2="2.83" y2="16"></line>
-                    <line x1="16.62" y1="12" x2="10.88" y2="21.94"></line>
-                </svg>
+                <?= $userConnected->first_name?> <?= $userConnected->last_name?>
             </a>
             <a href="" id="logout-link" class="py-2 d-md-inline-block">
                 Déconnexion
@@ -149,20 +139,29 @@ else{
      */
     if($userConnected){
         ?>
-        <div id="welcomeUserConnected">
-            <div id="landing-top-artists-vegas" class="position-relative overflow-hidden m-md-3 text-left">
-                <h2>Bienvenue <?= $userConnected->first_name?> <?= $userConnected->last_name?>.</h2>
-            </div>
-        </div>
-        <div id="topArtists">
-            <div id="landing-top-artists-vegas" class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center">
-                <h2 id="topArtistHeading" class="left">Artistes du moment</h2>
-                <div class="col-md-5 p-lg-5 mx-auto my-5 text-light">
 
+        <div class="d-md-flex flex-md-equal w-100 my-md-3 pl-md-3">
+            <!-- Div sur les artistes en tendance -->
+            <div class="bg-dark mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center text-white overflow-hidden">
+                <div id="topArtistsHeadingDiv" class="my-3 py-3">
+                    <h2 class="display-5">Artistes du moment</h2>
+                    <p class="lead">Découvrez les sensations du moment.
+                    </p>
                 </div>
+                <div class="bg-light shadow-sm mx-auto" style="width: 80%; height: 300px; border-radius: 21px 21px 0 0;"></div>
+            </div>
+            <!-- Div sur les infos de l'utilisateur-->
+            <div class="bg-light mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
+                <div class="my-3 p-3">
+                    <h2 class="display-5">Explorer une infinité de titres</h2>
+                    <p class="lead">
+                        Des millions de titres, à la portée de tous.
+                    </p>
+                </div>
+                <div class="bg-dark shadow-sm mx-auto" style="width: 80%; height: 300px; border-radius: 21px 21px 0 0;"></div>
             </div>
         </div>
-    <?php
+        <?php
     }
     ?>
 </div>

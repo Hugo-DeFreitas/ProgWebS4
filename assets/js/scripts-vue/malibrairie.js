@@ -207,44 +207,76 @@ function displaySearchResultsInDiv(searchResults,div) {
         return;
     }
 
+    /*
+    Configuration des nouveaux éléments HTML créés. On va ici construire dynamiquement un élément de liste qui contiendra
+    pour chaque résultat de recherche reçu, des informations concernant l'artiste, le nombre d'auditeurs du titre chaque mois,
+    et autre.
+    */
     searchResults.track.forEach((track) => {
         console.log("Track reçu:");
         console.log(track);
 
-        //Nouveaux résultats.
-        let newTrackResult = $("<a/>");
-        let newTrackResultInnerContainer = $("<div>");
-        let newTrackResultHeading = $("<h5/>");
-        let newTrackResultNumberOfListeners = $("<small/>");
-        let newTrackResultArtistPart = $("<p/>");
-
-        /*
-        Configuration des nouveaux éléments HTML créés.
-         */
         //Container principal
+        let newTrackResult = $("<a/>");
         newTrackResult.attr({
             href : track.url,
             class : "list-group-item list-group-item-action flex-column align-items-start"
         });
         //Container secondaire
-        newTrackResultInnerContainer.addClass("d-flex w-100 justify-content-between");
-        //Titre de l'item
-        newTrackResultHeading.addClass('mb-1');
-        newTrackResultHeading.html(track.name);
-        //Nombre d'écoutes par mois de l'artiste.
-        newTrackResultNumberOfListeners.html("Écoutes mensuelles: <strong>"+track.listeners+"</strong>");
-        //Infos diverses
-        newTrackResultArtistPart.addClass('mb-1');
-        newTrackResultArtistPart.html(track.artist);
+        let newTrackResultInnerContainer = $("<div>");
+        newTrackResultInnerContainer.addClass("d-flex");
 
-        //On emboite les parties.
-        newTrackResultInnerContainer.append(newTrackResultHeading);
-        newTrackResultInnerContainer.append(newTrackResultNumberOfListeners);
+        /*
+        Première colonne, qui contient :
+         - l'image de l'album du titre (On met une image par défaut en attendant de la remplacer par la vrai image, si elle est disponible).
+         */
+        let newTrackResultColNo1 =   $('<div class="col-3 div-for-track-img">');
+
+        //Image de l'album concerné.
+        let trackImage = $("<img class='d-block'>");
+        trackImage.attr({
+            id : 'img-for-track-mbid-'+track.mbid,
+            class: 'float-left rounded',
+            src : "assets/images/album-img-not-found.png"
+        });
+
+        //On emboite l'élément dans le container
+        newTrackResultColNo1.append(trackImage);
+
+        /*
+        Deuxième colonne, qui contient :
+         - Le nom du titre + Le nom de l'artiste qui a fait le morceau
+         - (Optionnel) une description du morceau, si on a réussi à la récupérer côté serveur.
+         */
+        let newTrackResultColNo2 =   $('<div class="col-8 text-justify">');
+
+        //Nom de l'artiste
+        let trackNameAndArtist = $('<h5 class="mb-2 track-and-artist-name"/>');
+        trackNameAndArtist.html('<em>'+track.name+'</em> - '+ track.artist);
+
+        //Description du morceau
+        let trackDescription = $('<p class="mb-5 track-description">');
+
+        //On emboite les deux éléments dans le container
+        newTrackResultColNo2.append(trackNameAndArtist);
+        newTrackResultColNo2.append(trackDescription);
+
+        /* Dernier élément, qui contient le nombre d'écoutes du titre au mois courant */
+        let newTrackResultColNo3 =   $('<div class="col-1">');
+        let numberOfMonthlyListeners = $("<small/>");
+        numberOfMonthlyListeners.html("Écoutes mensuelles: <strong>"+track.listeners+"</strong>");
+        newTrackResultColNo3.append(numberOfMonthlyListeners);
+
+        //On emboite les 2 colonnes et le nombre d'écoutes dans le innerContainer
+        newTrackResultInnerContainer.append(newTrackResultColNo1);
+        newTrackResultInnerContainer.append(newTrackResultColNo2);
+        newTrackResultInnerContainer.append(newTrackResultColNo3);
+
+        //On ajoute le résultat enfin construit à la liste des résultats
         newTrackResult.append(newTrackResultInnerContainer);
-        newTrackResult.append(newTrackResultArtistPart);
         resultsTracksDiv.append(newTrackResult);
 
-        //Traitement supplémentaire, pour récupérer plus d'infos.
+        //Traitement supplémentaire, pour récupérer plus d'infos sur le titre, mais aussi et surtout l'image de l'album.
         new Promise(function (resolve, reject) {
             //Si un titre a un mbid, cela signifie qu'on peut éventuellement aller chercher des infos supplémentaires sur celui-ci.
             if(track.mbid){
@@ -269,13 +301,11 @@ function displaySearchResultsInDiv(searchResults,div) {
         }).then((trackInfos) => {
             //Si on reçoit faux de la part de la promesse, on ne fait rien.
             if (trackInfos){
-                let trackImage = $("<img>");
                 let trackImageURL = trackInfos.album.image[2]["#text"];
                 trackImage.attr({
                     src : trackImageURL
                 });
-                newTrackResultHeading.before(trackImage);
-
+                trackDescription.html(trackInfos.wiki.summary);
             }
         });
     });
