@@ -23,4 +23,20 @@ $(document).ready( function () {
             {src: 'assets/images/apollon-descr-2.jpg'}
         ]
     });
+
+    $("#img-for-trending-artists").vegas({
+        transition: false,
+        timer: false,
+        slides: [
+            {src: 'assets/images/apollon-descr-2.jpg'}
+        ]
+    });
+
+    $("#img-for-tracks-exploration").vegas({
+        transition: false,
+        timer: false,
+        slides: [
+            {src: 'assets/images/music-corner.png'}
+        ]
+    });
 });

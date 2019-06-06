@@ -3,6 +3,7 @@
 if(isset($user_model)){
     /**
      * @var User_Model $userConnected
+     * @var Playlist_Model[] $playlists_from_user
      */
     $userConnected = $user_model;
 }
@@ -50,7 +51,7 @@ else{
             </a>
         </div>
     <?php } else {?>
-    <div id="header-for-connected-user"
+        <div id="header-for-connected-user"
              class="container d-flex flex-column flex-md-row justify-content-between">
             <a class="py-2" href="#">
                 <?= $userConnected->first_name?> <?= $userConnected->last_name?>
@@ -61,35 +62,53 @@ else{
             <a data-toggle="modal" class="py-2 d-md-inline-block" data-target="#search-modal" href="">
                 <i class="fa fa-search"></i>
             </a>
+            <li class="nav-item dropleft" style="list-style: none;">
+                <a class="nav-item nav-link dropdown-toggle mr-md-2" href="" id="playlists-from-user-id-<?= $userConnected->id?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Playlists
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="bd-versions">
+                    <?php
+                    if($playlists_from_user){
+                        foreach ($playlists_from_user as $playlist){
+                            ?>
+                            <a class="dropdown-item" id="dropdown-item-with-playlist-id-<?= $playlist->id?>">
+                                <i class="fa fa-play-circle text-primary"></i>&nbsp;<?= $playlist->name ?>
+                            </a>
+                            <?php
+                        }
+                    }
+                    ?>
+                </div>
+            </li>
         </div>
     <?php } ?>
 </nav>
 <!-- FIN DU HEADER -->
 
 <?php if($userConnected) { ?>
-<!-- Modal de recherche pour les artistes, les titres et albums-->
-<div class="modal fade" id="search-modal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Recherche.</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p class="lead">
-                    Utiliser le moteur de recherche d'<strong>Apollon</strong> pour rechercher de nouveaux <strong>artistes, albums et titres</strong>.
-                </p>
-                <input name="search-for-tracks" id="search-for-tracks" class="form-control mr-sm-2" type="text" placeholder="Rerchercher des titres." aria-label="search-for-tracks">
-                <!-- Résultats de la recherche -->
-                <div id="results-search-for-tracks" class="list-group">
+    <!-- Modal de recherche pour les artistes, les titres et albums-->
+    <div class="modal fade" id="search-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Recherche.</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="lead">
+                        Utiliser le moteur de recherche d'<strong>Apollon</strong> pour rechercher de nouveaux <strong>artistes, albums et titres</strong>.
+                    </p>
+                    <input name="search-for-tracks" id="search-for-tracks" class="form-control mr-sm-2" type="text" placeholder="Rerchercher des titres." aria-label="search-for-tracks">
+                    <!-- Résultats de la recherche -->
+                    <div id="results-search-for-tracks" class="list-group">
 
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 <?php } ?>
 
@@ -98,47 +117,50 @@ else{
 
     </div>
     <?php if(!$userConnected) { ?>
-    <div id="landingSlider">
-        <div id="landing-message-vegas" class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center">
-            <div class="col-md-5 p-lg-5 mx-auto my-5 text-light">
-                <h1 class="display-4 font-weight-normal">Bienvenue sur <strong>Apollon</strong>.</h1>
-                <p class="lead font-weight-normal">Le créateur de playlist ultime.</p>
-                <a data-toggle="modal" data-target="#about-modal" class="btn btn-outline-secondary">En savoir plus</a>
-            </div>
-        </div>
-    </div>
-    <div id="landingDescription">
-        <div class="d-md-flex flex-md-equal w-100 my-md-3 pl-md-3">
-            <div class="bg-dark mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center text-white overflow-hidden">
-                <div class="my-3 py-3">
-                    <h2 class="display-5">Retrouver vos artistes préférés</h2>
-                    <p class="lead">
-                        Connectez-vous et cherchez de nouveaux titres, créer des playlists.<br>
-                        Toutes les fonctionnalités sur une seule page.
-                    </p>
-                </div>
-                <div id="apollon-description-1" class="bg-light box-shadow mx-auto custom-box">
-                </div>
-            </div>
-            <div class="bg-light mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
-                <div class="my-3 p-3">
-                    <h2 class="display-5">Explorer une infinité de titres</h2>
-                    <p class="lead">
-                        Des millions de titres, à la portée de tous. <br>
-                        Un moteur de recherche efficace et puissant.
-                    </p>
-                </div>
-                <div id="apollon-description-2" class="bg-dark box-shadow mx-auto custom-box">
+        <div id="landingSlider">
+            <div id="landing-message-vegas" class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center">
+                <div class="col-md-5 p-lg-5 mx-auto my-5 text-light">
+                    <h1 class="display-4 font-weight-normal">Bienvenue sur <strong>Apollon</strong>.</h1>
+                    <p class="lead font-weight-normal">Le créateur de playlist ultime.</p>
+                    <a data-toggle="modal" data-target="#about-modal" class="btn btn-outline-secondary">En savoir plus</a>
                 </div>
             </div>
         </div>
-    </div>
+        <div id="landingDescription">
+            <div class="d-md-flex flex-md-equal w-100 my-md-3 pl-md-3">
+                <div class="bg-dark mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center text-white overflow-hidden">
+                    <div class="my-3 py-3">
+                        <h2 class="display-5">Retrouver vos artistes préférés</h2>
+                        <p class="lead">
+                            Connectez-vous et cherchez de nouveaux titres, créer des playlists.<br>
+                            Toutes les fonctionnalités sur une seule page.
+                        </p>
+                    </div>
+                    <div id="apollon-description-1" class="bg-light box-shadow mx-auto custom-box">
+                    </div>
+                </div>
+                <div class="bg-light mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
+                    <div class="my-3 p-3">
+                        <h2 class="display-5">Explorer une infinité de titres</h2>
+                        <p class="lead">
+                            Des millions de titres, à la portée de tous. <br>
+                            Un moteur de recherche efficace et puissant.
+                        </p>
+                    </div>
+                    <div id="apollon-description-2" class="bg-dark box-shadow mx-auto custom-box">
+                    </div>
+                </div>
+            </div>
+        </div>
     <?php }
     /**
      * Corps de la page quand l'utilisateur est connecté.
      */
     if($userConnected){
         ?>
+        <!-- Modal formulaire d'ajout des playlist -->
+
+
 
         <div class="d-md-flex flex-md-equal w-100 my-md-3 pl-md-3">
             <!-- Div sur les artistes en tendance -->
@@ -186,136 +208,142 @@ else{
 </footer>
 
 <!-- Modals -->
-<div class="modal fade" id="about-modal" role="dialog" tabindex="-1">
-    <div class="modal-dialog modal-md" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">A propos.</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="card">
-                    <div class="card-img">
-                        <img class="card-img" src="assets/images/about-apollon.png">
-                    </div>
-                    <div class="card-body">
-                        <h2>Réalisation</h2>
-                        <p class="lead">
-                            Le projet <strong>Apollon</strong> a été réalisé dans le cadre d'un <strong>module de programmation Web</strong> et de JavaScript à l'IUT Informatique
-                            d'Aix-en-Provence.
-                        </p>
-                        <h6>
-                            L'objectif : manipuler JQuery, JS proprement, en rechargeant jamais la page via des appels Ajax.
-                        </h6>
-                    </div>
+<?php if(!$userConnected) {?>
+    <div class="modal fade" id="about-modal" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">A propos.</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="sign-in-modal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Se connecter <i class="fa fa-user"></i></h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form name="signInForm" id="sign-in-form">
-                    <div class="form-group">
-                        <label for="sign-in-login">Login</label>
-                        <input name="signInLogin" type="text" class="form-control" id="sign-in-login" placeholder="Votre nom d'utilisateur.">
-                    </div>
-                    <div class="form-group">
-                        <label for="sign-in-password">Mot de passe</label>
-                        <input name="signInPassword" type="password" class="form-control" id="sign-in-password" placeholder="Password">
-                    </div>
-                    <div id="callback-sign-in-message">
-                        <!-- Zone remplie en cas d'erreur lors de la connexion-->
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
-                        <button type="submit" id="sign-in-submit-btn" class="btn btn-primary">Connexion</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="sign-up-modal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">S'inscrire <i class="fa fa-user"></i></h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form name="signUpForm" id="sign-up-form">
-                    <div class="form-group">
-                        <label for="sign-up-firstname">Nom</label>
-                        <input name="signUpFirstName" type="text" class="form-control" id="sign-up-firstname" placeholder="Tom">
-                    </div>
-                    <div class="form-group">
-                        <label for="sign-up-lastname">Nom</label>
-                        <input name="signUpLastName" type="text" class="form-control" id="sign-up-lastname" placeholder="Cruise">
-                    </div>
-                    <div class="form-group">
-                        <label for="sign-up-login">Login <strong>*</strong></label>
-                        <input name="signUpLogin" type="text" class="form-control" id="sign-up-login" placeholder="Votre nom d'utilisateur unique.">
-                    </div>
-                    <div class="form-group">
-                        <label for="sign-up-password">Mot de passe <strong>*</strong></label>
-                        <input name="signUpPassword" type="password" class="form-control" id="sign-up-password" placeholder="Mot de passe">
-                    </div>
-                    <div class="form-group">
-                        <label for="sign-up-password-confirmation">Confirmation <strong>*</strong></label>
-                        <input name="signUpPasswordConfirmation" type="password" class="form-control" id="sign-in-password-confirmation" placeholder="Confirmer votre mot de passe">
-                    </div>
-                    <div class="form-group">
-                        <label for="sign-up-user-bio">Bio</label>
-                        <textarea name="signUpUserBio" class="form-control" id="sign-up-user-bio" rows="3" placeholder="Une courte description?"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="sign-up-user-pp">Bio</label>
-                        <input name="signUpUserPP" class="form-control" id="sign-up-user-pp" placeholder="L'URL de votre photo de profil.">
-                    </div>
-                    <div id="callback-sign-up-message">
-                        <!-- Zone remplie en cas d'erreur lors de la connexion-->
-                    </div>
-                    <div class="modal-footer">
-                        <div class="text-left">
-                            <p class="text-danger">
-                                <small><strong>*</strong>, champs obligatoires</small>
-                            </p>
+                <div class="modal-body">
+                    <div class="card">
+                        <div class="card-img">
+                            <img class="card-img" src="assets/images/about-apollon.png">
                         </div>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
-                        <button type="submit" id="sign-up-submit-btn" class="btn btn-primary">S'inscrire</button>
+                        <div class="card-body">
+                            <h2>Réalisation</h2>
+                            <p class="lead">
+                                Le projet <strong>Apollon</strong> a été réalisé dans le cadre d'un <strong>module de programmation Web</strong> et de JavaScript à l'IUT Informatique
+                                d'Aix-en-Provence.
+                            </p>
+                            <h6>
+                                L'objectif : manipuler JQuery, JS proprement, en rechargeant jamais la page via des appels Ajax.
+                            </h6>
+                        </div>
                     </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="loader" tabindex="-100" role="alert" aria-hidden="true">
-    <div class="modal-dialog modal-sm" role="document">
-        <div class="modal-content">
-            <div class="text-center">
-                <div class="spinner-border" role="status">
-                    <span class="sr-only">Loading...</span>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
+    <div class="modal fade" id="sign-in-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Se connecter <i class="fa fa-user"></i></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form name="signInForm" id="sign-in-form">
+                        <div class="form-group">
+                            <label for="sign-in-login">Login</label>
+                            <input name="signInLogin" type="text" class="form-control" id="sign-in-login" placeholder="Votre nom d'utilisateur.">
+                        </div>
+                        <div class="form-group">
+                            <label for="sign-in-password">Mot de passe</label>
+                            <input name="signInPassword" type="password" class="form-control" id="sign-in-password" placeholder="Password">
+                        </div>
+                        <div id="callback-sign-in-message">
+                            <!-- Zone remplie en cas d'erreur lors de la connexion-->
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                            <button type="submit" id="sign-in-submit-btn" class="btn btn-primary">Connexion</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="sign-up-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">S'inscrire <i class="fa fa-user"></i></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form name="signUpForm" id="sign-up-form">
+                        <div class="form-group">
+                            <label for="sign-up-firstname">Nom</label>
+                            <input name="signUpFirstName" type="text" class="form-control" id="sign-up-firstname" placeholder="Tom">
+                        </div>
+                        <div class="form-group">
+                            <label for="sign-up-lastname">Nom</label>
+                            <input name="signUpLastName" type="text" class="form-control" id="sign-up-lastname" placeholder="Cruise">
+                        </div>
+                        <div class="form-group">
+                            <label for="sign-up-login">Login <strong>*</strong></label>
+                            <input name="signUpLogin" type="text" class="form-control" id="sign-up-login" placeholder="Votre nom d'utilisateur unique.">
+                        </div>
+                        <div class="form-group">
+                            <label for="sign-up-password">Mot de passe <strong>*</strong></label>
+                            <input name="signUpPassword" type="password" class="form-control" id="sign-up-password" placeholder="Mot de passe">
+                        </div>
+                        <div class="form-group">
+                            <label for="sign-up-password-confirmation">Confirmation <strong>*</strong></label>
+                            <input name="signUpPasswordConfirmation" type="password" class="form-control" id="sign-in-password-confirmation" placeholder="Confirmer votre mot de passe">
+                        </div>
+                        <div class="form-group">
+                            <label for="sign-up-user-bio">Bio</label>
+                            <textarea name="signUpUserBio" class="form-control" id="sign-up-user-bio" rows="3" placeholder="Une courte description?"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="sign-up-user-pp">Bio</label>
+                            <input name="signUpUserPP" class="form-control" id="sign-up-user-pp" placeholder="L'URL de votre photo de profil.">
+                        </div>
+                        <div id="callback-sign-up-message">
+                            <!-- Zone remplie en cas d'erreur lors de la connexion-->
+                        </div>
+                        <div class="modal-footer">
+                            <div class="text-left">
+                                <p class="text-danger">
+                                    <small><strong>*</strong>, champs obligatoires</small>
+                                </p>
+                            </div>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                            <button type="submit" id="sign-up-submit-btn" class="btn btn-primary">S'inscrire</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<?php } else { ?>
+    <div class="modal fade" id="loader" tabindex="-100" role="alert" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <?php
+}
+?>
 
 <!-- Scripts Bootstrap + Librairies autorisées dans le cadre du projet -->
 <script src="<?php echo base_url('assets/js/jquery-3.3.1.min.js')?>"></script>

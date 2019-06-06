@@ -525,6 +525,20 @@ class Super_Model extends CI_Model
     }
 
     /**
+     * Cette fonction est l'équivalent d'une requête de type 'SELECT ... FROM ... WHERE $param = $value' en BD.
+     * @param  string $param
+     * @param null|string $value
+     * @return $this|array
+     */
+    public function find_all_with_param($param, $value = null)
+    {
+        $model = $this->db->from($this::TABLE)
+            ->where($param, $value)
+            ->get()->custom_result_object(get_class($this));
+        return $model;
+    }
+
+    /**
      * Même fonction qu'un has_many(), mais il s'agit ici d'une relation n*n.
      *
      * Par exemple, on pourra utiliser cette fonction dans cet exemple : récupérer tous les rôles d'un user donné.
@@ -539,7 +553,7 @@ class Super_Model extends CI_Model
      * @param $other_table_primary_key
      * @return mixed
      */
-    protected function has_many_n_n($primary_key, $model, $other_table_primary_key)
+    public function has_many_n_n($primary_key, $model, $other_table_primary_key)
     {
         //Si la clé primaire existe
         if($primary_key){

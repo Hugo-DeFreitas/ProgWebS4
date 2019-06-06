@@ -9,7 +9,7 @@ header("Access-Control-Allow-Methods: GET, OPTIONS");
 /**
  * Class Super_Controller
  *
- * @property CI_DB_driver $db
+ * @property CI_DB_query_builder $db
  * @property  CI_Input $input
  * @property CI_Output $output
  * @property CI_Session $session
