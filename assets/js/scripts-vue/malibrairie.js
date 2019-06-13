@@ -150,11 +150,13 @@ function logout() {
  * Affiche des bouttons à propos des topArtists.
  */
 function getTopArtists() {
+    let topArtistZone = $("#top-artist-zone");
+    //On clear la zone pour éviter la duplication si l'utilisateur fait des "va-et-vient" vers ce menu.
+    topArtistZone.find('.top-artist-btn').remove();
     Artist.get_top_artists().then((allTopArtists) => {
-        console.log(allTopArtists);
         allTopArtists.forEach((anArtist) => {
             let topArtistBtn = anArtist.toButton();
-            $("#top-artist-zone").find(".modal-body").append(topArtistBtn);
+            topArtistZone.find(".modal-body").append(topArtistBtn);
         })
     });
 }
@@ -208,13 +210,12 @@ function displaySearchResultsInDiv(searchResults,div) {
     et autre.
     */
     searchResults.track.forEach((track) => {
-        console.log("Track reçu:");
-        console.log(track);
+        let currentTrack = new Track(track);
 
         //Container principal
         let newTrackResult = $("<a/>");
         newTrackResult.attr({
-            href : track.url,
+            href : currentTrack.url,
             class : "list-group-item list-group-item-action flex-column align-items-start"
         });
         //Container secondaire
@@ -230,9 +231,9 @@ function displaySearchResultsInDiv(searchResults,div) {
         //Image de l'album concerné.
         let trackImage = $("<img class='d-block'>");
         trackImage.attr({
-            id : 'img-for-track-mbid-'+track.mbid,
+            id : 'img-for-track-mbid-' + currentTrack.mbid,
             class: 'float-left rounded',
-            src : "assets/images/album-img-not-found.png"
+            src : "assets/images/album-img-not-found.png" //Pour l'instant c'est une image standard.
         });
 
         //On emboite l'élément dans le container
@@ -247,7 +248,7 @@ function displaySearchResultsInDiv(searchResults,div) {
 
         //Nom de l'artiste
         let trackNameAndArtist = $('<h5 class="mb-2 track-and-artist-name"/>');
-        trackNameAndArtist.html('<em>'+track.name+'</em> - '+ track.artist);
+        trackNameAndArtist.html('<em>'+currentTrack.name+'</em> - '+ track.artist);
 
         //Description du morceau
         let trackDescription = $('<p class="mb-5 track-description">');
@@ -281,9 +282,10 @@ function displaySearchResultsInDiv(searchResults,div) {
                 })
                     .done(function(trackInfos) {
                         if(trackInfos){
-                            console.log("Track informations :");
+                            console.log('Track infos');
                             console.log(trackInfos);
-                            resolve(trackInfos.track);
+                            let newTrackInfos = new Track(trackInfos.track);
+                            resolve(newTrackInfos);
                         }
                         else {
                             resolve(false);

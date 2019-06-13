@@ -173,6 +173,7 @@ $userConnected = $user_model;
 <!-- Scripts inclus pour la vue -->
 <script src="<?php echo base_url('assets/js/scripts-vue/config-js-apollon.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/artist.js')?>"></script>
+<script src="<?php echo base_url('assets/js/scripts-vue/track.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/malibrairie.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/dom-functions.js')?>"></script>
 

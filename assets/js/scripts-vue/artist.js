@@ -47,7 +47,6 @@ class Artist {
         else {
             console.error("Le JSON passé en paramètre est vide.");
         }
-
     }
 
     /**
@@ -56,9 +55,7 @@ class Artist {
      */
     toButton() {
         let newButton = $('<button type="button" ' +
-            'class="btn btn-primary" id="btn-artist-mbid-'+this.mbid+'"' +
-            'data-toggle="tooltip" data-placement="top" ' +
-            'title="'+this.is_on_tour+'">');
+            'class="btn btn-primary top-artist-btn" id="btn-artist-mbid-'+this.mbid+'">');
         newButton.html(this.name);
         //Initialisation des tooltips
         newButton.tooltip();
