@@ -351,7 +351,7 @@ else{
 <script src="<?php echo base_url('assets/js/bootstrap.min.js')?>"></script>
 <script src="<?php echo base_url('assets/js/vegas/vegas.min.js')?>"></script>
 <!-- Scripts inclus pour la vue -->
-<script src="<?php echo base_url('assets/js/scripts-vue/config-vegas.js')?>"></script>
+<script src="<?php echo base_url('assets/js/scripts-vue/config-js-apollon.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/malibrairie.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/dom-functions.js')?>"></script>
 
@@ -397,7 +397,7 @@ else{
                 //Appel Ajax qui va chercher des titres correspondants.
                 searchForTracks(newVal).then((tracksResults) => {
                     //On cache le loader
-                    hideLoaderInDiv(saveContext);
+                    saveContext.hideInnerLoader();
                     //On affiche les résultats de la recherche dans la div concernée.
                     displaySearchResultsInDiv(tracksResults,resultsDiv);
                 });

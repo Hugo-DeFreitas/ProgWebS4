@@ -54,3 +54,7 @@
 .forcehide {
   display: none !important;
 }
+
+.appearable-zone{
+  display: none;
+}

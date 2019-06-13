@@ -52,13 +52,35 @@ $userConnected = $user_model;
 </nav>
 <!-- FIN DU HEADER -->
 
-<!-- Modal de recherche pour les artistes, les titres et albums-->
-<div class="modal fade" id="search-modal" tabindex="-1" role="dialog" aria-hidden="true">
+<!-- Zone de recherche pour les artistes, les titres et albums-->
+<div class="appearable-zone" id="top-artist-zone">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Top artistes.</h5>
+                <button type="button" id="hide-search-zone" class="close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="lead">
+                    Artistes les plus <strong>streamés</strong>.
+                </p>
+                <p class="row" id="display-top-artists">
+
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Zone de recherche pour les artistes, les titres et albums-->
+<div class="appearable-zone" id="search-zone">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Recherche.</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -77,23 +99,26 @@ $userConnected = $user_model;
 </div>
 
 <div id="main">
-
     <!-- Modal formulaire d'ajout des playlist -->
+
 
     <div class="d-md-flex flex-md-equal w-100 my-md-3 pl-md-3">
         <!-- Div sur les artistes en tendance -->
-        <div class="bg-dark mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center text-white overflow-hidden">
-            <div id="topArtistsHeadingDiv" class="my-3 py-3">
+        <button class="bg-dark mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center text-white overflow-hidden"
+                style="border: none"
+                id="top-artists-trigger">
+            <div class="my-3 py-3">
                 <h2 class="display-5">Artistes du moment</h2>
-                <p class="lead">Découvrez les sensations du moment.
+                <p class="lead">
+                    Découvrez les sensations du moment.
                 </p>
             </div>
-            <div id="img-for-trending-artists" class="bg-light shadow-sm mx-auto" style="width: 80%; height: 300px; border-radius: 21px 21px 0 0;"></div>
-        </div>
+            <div id="img-for-trending-artists" class="bg-light shadow-sm mx-auto custom-box"></div>
+        </button>
         <!-- Div sur les infos de l'utilisateur-->
         <button class="bg-light mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden"
-             data-toggle="modal"
-             data-target="#search-modal" style="border: none">
+                id="start-searching-trigger"
+                style="border: none">
             <div class="my-3 p-3">
                 <h2 class="display-5">Explorer une infinité de titres</h2>
                 <p class="lead">
@@ -101,8 +126,7 @@ $userConnected = $user_model;
                 </p>
             </div>
             <div id="img-for-tracks-exploration"
-                 class="bg-dark shadow-sm mx-auto"
-                 style="width: 80%; height: 300px; border-radius: 21px 21px 0 0;">
+                 class="bg-dark shadow-sm mx-auto custom-box">
             </div>
         </button>
     </div>
@@ -147,17 +171,24 @@ $userConnected = $user_model;
 <script src="<?php echo base_url('assets/js/bootstrap.min.js')?>"></script>
 <script src="<?php echo base_url('assets/js/vegas/vegas.min.js')?>"></script>
 <!-- Scripts inclus pour la vue -->
-<script src="<?php echo base_url('assets/js/scripts-vue/config-vegas.js')?>"></script>
+<script src="<?php echo base_url('assets/js/scripts-vue/config-js-apollon.js')?>"></script>
+<script src="<?php echo base_url('assets/js/scripts-vue/artist.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/malibrairie.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/dom-functions.js')?>"></script>
 
 <script>
     $(document).ready(function () {
-        /**
-         * Gestion  de la déconnexion en Ajax
-         */
-        $('#logout-link').click(function (e) {
-            logout();
+        let search          = $('#start-searching-trigger');
+        let topArtists      = $('#top-artists-trigger');
+        let logOutButton    = $('#logout-link');
+
+
+        logOutButton.click(logout);
+
+        search.prepare($('#search-zone'));
+        topArtists.prepare($('#top-artist-zone'));
+        topArtists.click(()=>{
+            getTopArtists();
         });
 
         //On met un timer pour ne pas faire de requêtes AJAX à chaque changement de lettres.
@@ -165,18 +196,20 @@ $userConnected = $user_model;
         let timeForUserBeforeAjaxRequest = 1000;
         $("#search-for-tracks").keyup(function(){
             let saveContext = $(this);
+            let searchZone = $("#search-zone");
             let resultsDiv = $('#results-search-for-tracks');
             let newVal = $(this).val();
             clearTimeout(typingTimer);
             //On efface les résultats précédents pour plus de clarté à chaque nouvelle valeur entrée par l'utilisateur.
             resultsDiv.empty();
             //On met un loader le temps de la recherche ajax.
-            showLoaderInDiv(saveContext);
+            resultsDiv.insertLoader();
             typingTimer = setTimeout(function () {
                 //Appel Ajax qui va chercher des titres correspondants.
                 searchForTracks(newVal).then((tracksResults) => {
                     //On cache le loader
-                    hideLoaderInDiv(saveContext);
+                    console.log('cache loader');
+                    searchZone.hideInnerLoader();
                     //On affiche les résultats de la recherche dans la div concernée.
                     displaySearchResultsInDiv(tracksResults,resultsDiv);
                 });

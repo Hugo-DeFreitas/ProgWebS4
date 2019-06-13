@@ -231,7 +231,7 @@
 <script src="<?php echo base_url('assets/js/bootstrap.min.js')?>"></script>
 <script src="<?php echo base_url('assets/js/vegas/vegas.min.js')?>"></script>
 <!-- Scripts inclus pour la vue -->
-<script src="<?php echo base_url('assets/js/scripts-vue/config-vegas.js')?>"></script>
+<script src="<?php echo base_url('assets/js/scripts-vue/config-js-apollon.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/malibrairie.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/dom-functions.js')?>"></script>
 

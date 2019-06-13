@@ -1,4 +1,10 @@
 /**
+ * ===============
+ * Fonctions liées à la gestion des utilisateurs.
+ * ===============
+ */
+
+/**
  * Permet de savoir si l'utilisateur est connecté ou non.
  */
 function isConnected(){
@@ -127,40 +133,29 @@ function signIn(event,domElement) {
  * Gestion de la déconnexion
  */
 function logout() {
-    console.log('coucou');
-    $.ajax( {
-        url : "User/logout/",
-        method : 'POST'
-    })
-        .done(function(response) {
-            console.log(response);
-        })
-        .fail(function(){
-            alert('erreur');
+    return new Promise((resolve, reject) => {
+        $.ajax( {
+            url : "User/logout/",
+            method : 'POST'
+        }).done((result) => {
+            resolve(result);
+            console.log("Déconnexion de l'utilisateur.");
+        }).fail(()=>{
+            alert('Une erreur est survenue sur le serveur lors de la déconnexion.');
         });
+    });
 }
 
+/**
+ * Affiche des bouttons à propos des topArtists.
+ */
 function getTopArtists() {
-    $.ajax({
-        url : 'Artist/get_top_artists/',
-        dataType : 'json'
-    }).done((artists) => {
-        let artistsDiv = $('#landing-top-artists-vegas');
-        //Pour chaque artiste reçus depuis le controller, on rajoute une div.
-        artists.artists.artist.forEach(function (artist) {
-            let currentArtist = $('<button type="button" class="btn btn-primary" >');
-            currentArtist.html(artist.name);
-            $.ajax({
-                url : 'Artist/get_artist_info/'+artist.mbid,
-                method:'POST',
-                dataType : 'json'
-            }).done((artistInfos) => {
-                console.log(artistInfos);
-            });
-            artistsDiv.append(currentArtist);
-        });
-    }).fail((result) => {
-        console.log('Une erreur est survenue dans la récupération des TopArtists du moment.');
+    Artist.get_top_artists().then((allTopArtists) => {
+        console.log(allTopArtists);
+        allTopArtists.forEach((anArtist) => {
+            let topArtistBtn = anArtist.toButton();
+            $("#top-artist-zone").find(".modal-body").append(topArtistBtn);
+        })
     });
 }
 
@@ -305,8 +300,70 @@ function displaySearchResultsInDiv(searchResults,div) {
                 trackImage.attr({
                     src : trackImageURL
                 });
-                trackDescription.html(trackInfos.wiki.summary);
+                if(typeof trackInfos.wiki !== "undefined"){
+                    trackDescription.html(trackInfos.wiki.summary);
+                }
             }
         });
     });
 }
+
+jQuery.fn.extend({
+    /**
+     * Fonction qui permet de faire des apparitions/disparitions dynamiques sur la div passée en paramètres.
+     *
+     * @this , la div qui fait disparaitre le corps de la page, puis qui fais apparaitre la div passée en tant que deuxième paramètre.
+     * @param appearableDiv, la div que l'on viendra afficher/cacher dynamiquement lors du click sur 'targetDiv'.
+     */
+    prepare : function(appearableDiv){
+        let main = $('#main');
+        this.click((e)=>{
+            //On fait disparaitre le main.
+            main.fadeOut(500);
+            //Puis on fait apparaitre la div voulue.
+            setTimeout(()=>{
+                appearableDiv.fadeIn(500);
+            },500);
+
+            /*
+            Normalement (si j'ai bien codé :) ), toutes les divs que  l'on viendra passer en deuxième paramètre de cette fonction
+            contienne un petit bouton qui permet de fermer la zone.
+             */
+            let hideTrigger = appearableDiv.find('.close');
+            hideTrigger.click(function(){
+                appearableDiv.fadeOut(500);
+                setTimeout(() => {
+                    main.fadeIn(500);
+                },500);
+            });
+        });
+    },
+
+    /**
+     * Fonction permettant d'afficher un loader dans une div.
+     */
+    insertLoader : function () {
+        //Si un loader est déjà présent dans la page, on ne le rajoute pas.
+        loaderAlreadyInDiv = this.parents(".appearable-zone").find(".loaderDisplayedInDiv");
+        if (loaderAlreadyInDiv.length > 0 && loaderAlreadyInDiv.is(":visible")){
+            return this;
+        }
+        let loader = '<div class="text-center loaderDisplayedInDiv">\n' +
+            '                <div class="spinner-border" role="status">\n' +
+            '                    <span class="sr-only">Loading...</span>\n' +
+            '                </div>\n' +
+            '            </div>';
+        this.after(loader);
+        return this;
+    },
+
+    /**
+     * Supprime tout loader invoqué par la fonction showLoaderInDiv(), à l'intérieur de la div qui appelle la fonction.
+     * @returns {*}
+     */
+    hideInnerLoader : function() {
+        loaderInDiv = this.find(".loaderDisplayedInDiv");
+        loaderInDiv.fadeOut(200);
+        return this;
+    }
+});
