@@ -4,7 +4,8 @@ class Track {
     name; //Le nom du titre
     mbid; //L'identifiant du titre
     url; //La page last.fm liée au titre
-    playcount; //Le nombre d'écoutes
+    playcount; //Le nombre d'écoutes totales du titre
+    listeners; //Le nombre d'auditeurs réguliers du titre
     duration; //La durée du titre
     album;  // L'album sur lequel apparait le titre (objet de type Album)
     artist; // Auteur du titre (objet de type Artist)
@@ -12,9 +13,8 @@ class Track {
     wiki; // Une explication du titre
     short_wiki; // Un résumé de l'explication du titre
 
-
     constructor(trackJSON) {
-        if(typeof trackJSON !== "undefined"){
+        if(typeof trackJSON === "object"){
             if(typeof trackJSON.name !== "undefined"){
                 this.name = trackJSON.name;
             }
@@ -31,6 +31,9 @@ class Track {
             if(typeof trackJSON.playcount !== "undefined"){
                 this.playcount = trackJSON.playcount;
             }
+            if(typeof trackJSON.listeners !== "undefined"){
+                this.playcount = trackJSON.listeners;
+            }
             if(typeof trackJSON.duration !== "undefined"){
                 this.duration = trackJSON.duration;
             }
@@ -38,7 +41,7 @@ class Track {
                 this.artist = new Artist(trackJSON.artist);
             }
             if(typeof trackJSON.album !== "undefined"){
-                this.album = trackJSON.album;
+                this.album = new Album(trackJSON.album);
             }
             if(typeof trackJSON.tags !== "undefined"){
                 this.tags = [];
@@ -47,8 +50,110 @@ class Track {
                 });
             }
         }
-        else {
+        else if(typeof trackJSON === "undefined"){
             console.error("Le JSON passé en paramètre est vide ou invalide (le morceau n'est pas disponible en BDD.");
         }
+        else{
+            this.name = trackJSON.name;
+        }
+    }
+
+    toSearchResult(){
+        //Container principal
+        let newTrackResult = $("<a/>");
+        newTrackResult.attr({
+            href : this.url,
+            class : "list-group-item list-group-item-action flex-column align-items-start"
+        });
+        //Container secondaire
+        let newTrackResultInnerContainer = $("<div>");
+        newTrackResultInnerContainer.addClass("d-flex");
+
+        /*
+        Première colonne, qui contient :
+         - l'image de l'album du titre (On met une image par défaut en attendant de la remplacer par la vrai image, si elle est disponible).
+         */
+        let newTrackResultColNo1 =   $('<div class="col-3 div-for-track-img">');
+
+        //Image de l'album concerné.
+        let trackImage = $("<img class='d-block'>");
+        trackImage.attr({
+            id : 'img-for-track-mbid-' + this.mbid,
+            class: 'float-left rounded',
+            src : "assets/images/album-img-not-found.png" //Pour l'instant c'est une image standard.
+        });
+
+        //On emboite l'élément dans le container
+        newTrackResultColNo1.append(trackImage);
+
+        /*
+        Deuxième colonne, qui contient :
+         - Le nom du titre + Le nom de l'artiste qui a fait le morceau
+         - (Optionnel) une description du morceau, si on a réussi à la récupérer côté serveur.
+         */
+        let newTrackResultColNo2 =   $('<div class="col-8 text-justify">');
+
+        //Nom de l'artiste
+        let trackNameAndArtist = $('<h5 class="mb-2 track-and-artist-name"/>');
+        trackNameAndArtist.html('<em>'+this.name+'</em> - '+ this.artist.name);
+
+        //Description du morceau
+        let trackDescription = $('<p class="mb-5 track-description">');
+
+        //On emboite les deux éléments dans le container
+        newTrackResultColNo2.append(trackNameAndArtist);
+        newTrackResultColNo2.append(trackDescription);
+
+        /* Dernier élément, qui contient le nombre d'écoutes du titre au mois courant */
+        let newTrackResultColNo3 =   $('<div class="col-1">');
+        let numberOfMonthlyListeners = $("<small/>");
+        numberOfMonthlyListeners.html("Écoutes mensuelles: <strong>"+this.playcount+"</strong>");
+        newTrackResultColNo3.append(numberOfMonthlyListeners);
+
+        //On emboite les 2 colonnes et le nombre d'écoutes dans le innerContainer
+        newTrackResultInnerContainer.append(newTrackResultColNo1);
+        newTrackResultInnerContainer.append(newTrackResultColNo2);
+        newTrackResultInnerContainer.append(newTrackResultColNo3);
+
+        //On ajoute le résultat enfin construit à la liste des résultats
+        newTrackResult.append(newTrackResultInnerContainer);
+
+        let self = this; //sauvegarde de contexte pour closure.
+
+        //Traitement supplémentaire, pour récupérer plus d'infos sur le titre, mais aussi et surtout l'image de l'album.
+        new Promise(function (resolve, reject) {
+            //Si un titre a un mbid, cela signifie qu'on peut éventuellement aller chercher des infos supplémentaires sur celui-ci.
+            if(typeof self.mbid !== "undefined"){
+                $.ajax( {
+                    url : "Track/get_info/"+self.mbid,
+                    method : 'POST',
+                })
+                    .done(function(trackInfos) {
+                        if(trackInfos){
+                            let newTrackInfos = new Track(trackInfos.track);
+                            resolve(newTrackInfos);
+                        }
+                        else {
+                            resolve(false);
+                        }
+                    })
+                    .fail(function(){
+                        resolve(false);
+                    });
+            }
+        }).then((trackInfos) => {
+            //Si on reçoit faux de la part de la promesse, on ne fait rien.
+            /** @var {Track} trackInfos */
+            if (trackInfos){
+                trackImage.attr({
+                    src : trackInfos.album.image
+                });
+                if(typeof trackInfos.wiki !== "undefined"){
+                    trackDescription.html(trackInfos.short_wiki);
+                }
+            }
+        });
+
+        return newTrackResult;
     }
 }

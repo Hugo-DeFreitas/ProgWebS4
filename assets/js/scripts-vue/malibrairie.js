@@ -176,7 +176,11 @@ function searchForTracks(trackName) {
         })
             .done(function(tracks) {
                 if(tracks){
-                    resolve(tracks.results.trackmatches);
+                    let trackObjectsArray = [];
+                    tracks.results.trackmatches.track.forEach((trackJSON)=>{
+                        trackObjectsArray.push(new Track(trackJSON));
+                    });
+                    resolve(trackObjectsArray);
                 }
                 else {
                     resolve(false);
@@ -186,127 +190,6 @@ function searchForTracks(trackName) {
                 resolve(false);
                 resultsDiv.empty();
             });
-    });
-}
-
-/**
- * Permet d'afficher les résultats d'une recherche dans une div.
- * @param searchResults, un tableau avec les résultats attendus
- * @param div, la div sur laquelles on append() les résultats.
- */
-function displaySearchResultsInDiv(searchResults,div) {
-    let resultsTracksDiv = div;
-    resultsTracksDiv.empty();
-    if(!searchResults || searchResults.track.length === 0){
-        console.log("Aucun résultat reçu.");
-        let errorMessage = "<div class='lead text-center'><p class='text-warning'>Aucun résultat connu pour cette recherche.</p></div>";
-        div.append(errorMessage);
-        return;
-    }
-
-    /*
-    Configuration des nouveaux éléments HTML créés. On va ici construire dynamiquement un élément de liste qui contiendra
-    pour chaque résultat de recherche reçu, des informations concernant l'artiste, le nombre d'auditeurs du titre chaque mois,
-    et autre.
-    */
-    searchResults.track.forEach((track) => {
-        let currentTrack = new Track(track);
-
-        //Container principal
-        let newTrackResult = $("<a/>");
-        newTrackResult.attr({
-            href : currentTrack.url,
-            class : "list-group-item list-group-item-action flex-column align-items-start"
-        });
-        //Container secondaire
-        let newTrackResultInnerContainer = $("<div>");
-        newTrackResultInnerContainer.addClass("d-flex");
-
-        /*
-        Première colonne, qui contient :
-         - l'image de l'album du titre (On met une image par défaut en attendant de la remplacer par la vrai image, si elle est disponible).
-         */
-        let newTrackResultColNo1 =   $('<div class="col-3 div-for-track-img">');
-
-        //Image de l'album concerné.
-        let trackImage = $("<img class='d-block'>");
-        trackImage.attr({
-            id : 'img-for-track-mbid-' + currentTrack.mbid,
-            class: 'float-left rounded',
-            src : "assets/images/album-img-not-found.png" //Pour l'instant c'est une image standard.
-        });
-
-        //On emboite l'élément dans le container
-        newTrackResultColNo1.append(trackImage);
-
-        /*
-        Deuxième colonne, qui contient :
-         - Le nom du titre + Le nom de l'artiste qui a fait le morceau
-         - (Optionnel) une description du morceau, si on a réussi à la récupérer côté serveur.
-         */
-        let newTrackResultColNo2 =   $('<div class="col-8 text-justify">');
-
-        //Nom de l'artiste
-        let trackNameAndArtist = $('<h5 class="mb-2 track-and-artist-name"/>');
-        trackNameAndArtist.html('<em>'+currentTrack.name+'</em> - '+ track.artist);
-
-        //Description du morceau
-        let trackDescription = $('<p class="mb-5 track-description">');
-
-        //On emboite les deux éléments dans le container
-        newTrackResultColNo2.append(trackNameAndArtist);
-        newTrackResultColNo2.append(trackDescription);
-
-        /* Dernier élément, qui contient le nombre d'écoutes du titre au mois courant */
-        let newTrackResultColNo3 =   $('<div class="col-1">');
-        let numberOfMonthlyListeners = $("<small/>");
-        numberOfMonthlyListeners.html("Écoutes mensuelles: <strong>"+track.listeners+"</strong>");
-        newTrackResultColNo3.append(numberOfMonthlyListeners);
-
-        //On emboite les 2 colonnes et le nombre d'écoutes dans le innerContainer
-        newTrackResultInnerContainer.append(newTrackResultColNo1);
-        newTrackResultInnerContainer.append(newTrackResultColNo2);
-        newTrackResultInnerContainer.append(newTrackResultColNo3);
-
-        //On ajoute le résultat enfin construit à la liste des résultats
-        newTrackResult.append(newTrackResultInnerContainer);
-        resultsTracksDiv.append(newTrackResult);
-
-        //Traitement supplémentaire, pour récupérer plus d'infos sur le titre, mais aussi et surtout l'image de l'album.
-        new Promise(function (resolve, reject) {
-            //Si un titre a un mbid, cela signifie qu'on peut éventuellement aller chercher des infos supplémentaires sur celui-ci.
-            if(track.mbid){
-                $.ajax( {
-                    url : "Track/get_info/"+track.mbid,
-                    method : 'POST',
-                })
-                    .done(function(trackInfos) {
-                        if(trackInfos){
-                            console.log('Track infos');
-                            console.log(trackInfos);
-                            let newTrackInfos = new Track(trackInfos.track);
-                            resolve(newTrackInfos);
-                        }
-                        else {
-                            resolve(false);
-                        }
-                    })
-                    .fail(function(){
-                        resolve(false);
-                    });
-            }
-        }).then((trackInfos) => {
-            //Si on reçoit faux de la part de la promesse, on ne fait rien.
-            if (trackInfos){
-                let trackImageURL = trackInfos.album.image[2]["#text"];
-                trackImage.attr({
-                    src : trackImageURL
-                });
-                if(typeof trackInfos.wiki !== "undefined"){
-                    trackDescription.html(trackInfos.wiki.summary);
-                }
-            }
-        });
     });
 }
 
@@ -367,5 +250,30 @@ jQuery.fn.extend({
         loaderInDiv = this.find(".loaderDisplayedInDiv");
         loaderInDiv.fadeOut(200);
         return this;
+    },
+
+    /**
+     * Permet d'afficher les résultats d'une recherche dans une div.
+     * @param {Track[]} searchResults, un tableau avec les résultats attendus
+     */
+    displaySearchResultsInside : function(searchResults) {
+        this.empty();
+        if(!searchResults || searchResults.length === 0){
+            console.log("Aucun résultat reçu.");
+            let errorMessage = "<div class='lead text-center'><p class='text-warning'>Aucun résultat connu pour cette recherche.</p></div>";
+            this.append(errorMessage);
+            return;
+        }
+
+        let self  = this;//Sauvegarde du contexte
+        /*
+        Configuration des nouveaux éléments HTML créés. On va ici construire dynamiquement un élément de liste qui contiendra
+        pour chaque résultat de recherche reçu, des informations concernant l'artiste, le nombre d'auditeurs du titre chaque mois,
+        et autre.
+        */
+        /** @var {Track} track*/
+        searchResults.forEach((track) => {
+            self.append(track.toSearchResult());
+        });
     }
 });

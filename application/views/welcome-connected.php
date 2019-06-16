@@ -173,6 +173,7 @@ $userConnected = $user_model;
 <!-- Scripts inclus pour la vue -->
 <script src="<?php echo base_url('assets/js/scripts-vue/config-js-apollon.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/artist.js')?>"></script>
+<script src="<?php echo base_url('assets/js/scripts-vue/album.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/track.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/malibrairie.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/dom-functions.js')?>"></script>
@@ -208,11 +209,12 @@ $userConnected = $user_model;
             typingTimer = setTimeout(function () {
                 //Appel Ajax qui va chercher des titres correspondants.
                 searchForTracks(newVal).then((tracksResults) => {
+                    console.log("Résultats pour la recherche '"+newVal+"' :");
+                    console.log(tracksResults);
                     //On cache le loader
-                    console.log('cache loader');
                     searchZone.hideInnerLoader();
                     //On affiche les résultats de la recherche dans la div concernée.
-                    displaySearchResultsInDiv(tracksResults,resultsDiv);
+                    resultsDiv.displaySearchResultsInside(tracksResults);
                 });
             }, timeForUserBeforeAjaxRequest);
         });

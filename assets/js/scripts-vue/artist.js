@@ -13,7 +13,7 @@ class Artist {
 
 
     constructor(artistJSON) {
-        if(typeof artistJSON !== "undefined"){
+        if(typeof artistJSON === "object"){
             if(typeof artistJSON.name !== "undefined"){
                 this.name = artistJSON.name;
             }
@@ -44,8 +44,14 @@ class Artist {
                 });
             }
         }
-        else {
+        else if(typeof artistJSON === "undefined"){
             console.error("Le JSON passé en paramètre est vide.");
+        }
+        else {
+            //Vraisemblablement, si ce n'est pas un JSON, et que la valeur est non-nulle, alors c'est le nom de l'artiste qu'on passe
+            // en paramètre du constructeur.
+            this.name = artistJSON;
+
         }
     }
 

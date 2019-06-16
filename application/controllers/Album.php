@@ -11,19 +11,19 @@ class Album extends Super_Controller
     }
 
     public function search_album($album_searched){
-        $result = (object) $this->get_api_request('album.search&album='.$album_searched);
+        $result = $this->get_api_request('album.search&album='.$album_searched.'&limit=10');
 
         $this->send_output_for_rest_api($result);
     }
 
     public function get_album_infos($artist_name,$album_name){
-        $result = (object) $this->get_api_request('album.getinfo&artist='.$artist_name.'&album='.$album_name);
+        $result = $this->get_api_request('album.getinfo&artist='.$artist_name.'&album='.$album_name);
 
         $this->send_output_for_rest_api($result);
     }
 
     public function get_album_tags($artist_name,$album_name){
-        $result = (object) $this->get_api_request('album.gettags&artist='.$artist_name.'&album='.$album_name);
+        $result = $this->get_api_request('album.gettags&artist='.$artist_name.'&album='.$album_name);
 
         $this->send_output_for_rest_api($result);
     }

@@ -12,7 +12,7 @@ class Track extends Super_Controller
 
     public function search_track($track_searched = false){
         if($track_searched){
-            $this->send_output_for_rest_api($this->get_api_request('track.search&track='.$track_searched.'&limit=6'));
+            $this->send_output_for_rest_api($this->get_api_request('track.search&track='.$track_searched.'&limit=5'));
         }
     }
 
