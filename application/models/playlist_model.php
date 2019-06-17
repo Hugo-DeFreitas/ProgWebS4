@@ -8,7 +8,9 @@ class Playlist_Model extends Super_Model
     public $id;
     public $name;
     public $description;
+    public $is_public;
 
     const NAME            = 'name';
     const DESCRIPTION     = 'description';
+    const IS_PUBLIC       = 'is_public';
 }

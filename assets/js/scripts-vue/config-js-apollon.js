@@ -39,4 +39,20 @@ $(document).ready( function () {
             {src: 'assets/images/music-corner.png'}
         ]
     });
+
+    $("#img-for-playlist-creation").vegas({
+        transition: false,
+        timer: false,
+        slides: [
+            {src: 'assets/images/listening-peace.png'}
+        ]
+    });
+
+    $("#img-for-playlists-consultation").vegas({
+        transition: false,
+        timer: false,
+        slides: [
+            {src: 'assets/images/listening.jpg'}
+        ]
+    });
 });

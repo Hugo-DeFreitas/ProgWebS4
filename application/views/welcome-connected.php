@@ -98,9 +98,65 @@ $userConnected = $user_model;
     </div>
 </div>
 
-<div id="main">
-    <!-- Modal formulaire d'ajout des playlist -->
 
+<!-- Zone de création d'une nouvelle playlist -->
+<div class="appearable-zone" id="playlist-creation-zone">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Créateur de playlist.</h5>
+                <button type="button" class="close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="lead">
+                    Créer une nouvelle <strong>playlist</strong>, sur notre plateforme, et compilez vos <strong>coups de coeurs</strong>.
+                </p>
+                <form id="new-playlist-form">
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">Nom de la playlist</label>
+                        <input type="text" class="form-control" id="playlist-name" aria-describedby="playlist-help" name="name" placeholder="Vacances 🌴">
+                        <small id="playlist-help" class="form-text text-muted">Parce qu'avec un nom c'est toujours plus facile.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="playlist-description">Description</label>
+                        <textarea class="form-control" id="playlist-description" rows="3" name="description" placeholder="A écouter sans modération 😎"></textarea>
+                    </div>
+                    <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" name="is_public" id="is-playlist-public">
+                        <label class="form-check-label" for="is-playlist-public">Rendre ma playlist publique</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Créer</button>
+                    <div id="callback-playlist-creation-message">
+                        <!-- Zone remplie en cas d'erreur lors de la création de la playlist-->
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Zone de consultation des playlists de l'utilisateur -->
+<div class="appearable-zone" id="playlist-search-zone">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Rechercher parmis mes playlists.</h5>
+                <button type="button" class="close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="lead">
+                    Toutes vos <strong>créations</strong>.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="main">
 
     <div class="d-md-flex flex-md-equal w-100 my-md-3 pl-md-3">
         <!-- Div sur les artistes en tendance -->
@@ -118,7 +174,7 @@ $userConnected = $user_model;
         <!-- Div sur les infos de l'utilisateur-->
         <button class="bg-light mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden"
                 id="start-searching-trigger"
-                style="border: none">
+                style="border: none;">
             <div class="my-3 p-3">
                 <h2 class="display-5">Explorer une infinité de titres</h2>
                 <p class="lead">
@@ -126,6 +182,37 @@ $userConnected = $user_model;
                 </p>
             </div>
             <div id="img-for-tracks-exploration"
+                 class="bg-dark shadow-sm mx-auto custom-box">
+            </div>
+        </button>
+    </div>
+    <div class="d-md-flex flex-md-equal w-100 my-md-3 pl-md-3">
+        <!-- Div "button" qui permet de consulter les playlists de l'utilisateur-->
+        <button class="bg-light mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden"
+                id="explore-user-playlist-trigger"
+                style="border: none">
+            <div class="my-3 p-3">
+                <h2 class="display-5">Consulter mes playlists</h2>
+                <p class="lead">
+                    Retrouvez vos créations.
+                </p>
+            </div>
+            <div id="img-for-playlists-consultation"
+                 class="bg-dark shadow-sm mx-auto custom-box">
+            </div>
+        </button>
+
+        <!-- Div "button" qui permet d'ajouter une playlist-->
+        <button class="bg-dark mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden text-white"
+                id="create-new-playlist-trigger"
+                style="border: none">
+            <div class="my-3 p-3">
+                <h2 class="display-5">Créer une nouvelle playlist</h2>
+                <p class="lead">
+                    Selons vos humeurs, selon vos envies.
+                </p>
+            </div>
+            <div id="img-for-playlist-creation"
                  class="bg-dark shadow-sm mx-auto custom-box">
             </div>
         </button>
@@ -175,6 +262,7 @@ $userConnected = $user_model;
 <script src="<?php echo base_url('assets/js/scripts-vue/artist.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/album.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/track.js')?>"></script>
+<script src="<?php echo base_url('assets/js/scripts-vue/playlist.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/malibrairie.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/dom-functions.js')?>"></script>
 
@@ -182,6 +270,8 @@ $userConnected = $user_model;
     $(document).ready(function () {
         let search          = $('#start-searching-trigger');
         let topArtists      = $('#top-artists-trigger');
+        let playlistCreator = $('#create-new-playlist-trigger');
+        let userPlaylists   = $('#explore-user-playlist-trigger');
         let logOutButton    = $('#logout-link');
 
 
@@ -192,6 +282,35 @@ $userConnected = $user_model;
         topArtists.click(()=>{
             getTopArtists();
         });
+        playlistCreator.prepare($('#playlist-creation-zone'));
+        userPlaylists.prepare($('#playlist-search-zone'));
+
+
+        $('#new-playlist-form').submit(function(e){
+            e.preventDefault();
+            let newPlaylist = Playlist.get_from_form($(this));
+
+            if(!newPlaylist.has_all_obligatory_attributes()){
+                displayAlertInDiv('Nous ne pourrons pas créer de playlist sans nom 🙃. Veuillez en donner un !'
+                    ,$('#callback-playlist-creation-message'),3000);
+                return;
+            }
+            console.log('Création de la nouvelle playlist "'+newPlaylist.name+'".');
+            console.log(newPlaylist);
+            $.ajax({
+                url : "Playlist/new_playlist/",
+                method : 'POST',
+                data: newPlaylist
+            })
+                .done((result)=>{
+                    console.log(result);
+                })
+                .fail((result)=>{
+                    console.error(result);
+                });
+        });
+
+
 
         //On met un timer pour ne pas faire de requêtes AJAX à chaque changement de lettres.
         let typingTimer;
