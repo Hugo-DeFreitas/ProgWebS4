@@ -32,28 +32,43 @@ class Playlist extends Super_Controller {
     public function new_playlist(){
         $userData = $this->session->get_userdata();
 
+        $result = new stdClass();
+
         $newPlaylistData = (object) $this->input->post();
-        $userData = $userData['user_connected'];
+        $userData = unserialize(serialize($userData['user_connected']));
 
         $newPlaylist = new Playlist_Model();
 
         $newPlaylist->name = $newPlaylistData->name;
         $newPlaylist->description = $newPlaylistData->description;
-        $newPlaylist->is_public = $newPlaylistData->is_public;
+        $newPlaylist->is_public = $newPlaylistData->is_public == 'true' ? 1 : 0;
 
-        $newPlaylistID = $newPlaylist->save();
+        $this->db->trans_start();
 
-        if(!$newPlaylistID){
-           return;
+        $newPlaylistID = $newPlaylist->insert();
+
+        if($newPlaylistData->is_public == 'true'){
+            $result->playlist = $newPlaylist;
+            $result->success = true;
+            $this->db->trans_complete();
+            $this->send_output_for_rest_api($newPlaylist);
+            return;
         }
 
         $newPlaylistHasUser = new User_has_playlist_Model();
+
         $newPlaylistHasUser->user_id = $userData->id;
         $newPlaylistHasUser->playlist_id = $newPlaylistID;
 
         $ret = $newPlaylistHasUser->insert();
 
-        $this->send_output_for_rest_api($newPlaylistData);
+        if($ret){
+            $result->playlist = $newPlaylist;
+            $result->success = true;
+            $this->db->trans_complete();
+            $this->send_output_for_rest_api($newPlaylist);
+            return;
+        }
     }
 
 }

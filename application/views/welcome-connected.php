@@ -286,29 +286,7 @@ $userConnected = $user_model;
         userPlaylists.prepare($('#playlist-search-zone'));
 
 
-        $('#new-playlist-form').submit(function(e){
-            e.preventDefault();
-            let newPlaylist = Playlist.get_from_form($(this));
-
-            if(!newPlaylist.has_all_obligatory_attributes()){
-                displayAlertInDiv('Nous ne pourrons pas créer de playlist sans nom 🙃. Veuillez en donner un !'
-                    ,$('#callback-playlist-creation-message'),3000);
-                return;
-            }
-            console.log('Création de la nouvelle playlist "'+newPlaylist.name+'".');
-            console.log(newPlaylist);
-            $.ajax({
-                url : "Playlist/new_playlist/",
-                method : 'POST',
-                data: newPlaylist
-            })
-                .done((result)=>{
-                    console.log(result);
-                })
-                .fail((result)=>{
-                    console.error(result);
-                });
-        });
+        $('#new-playlist-form').handlePlaylistCreation();
 
 
 

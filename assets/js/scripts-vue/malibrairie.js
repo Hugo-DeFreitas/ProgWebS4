@@ -58,11 +58,11 @@ function signUp(event,domElement) {
     let signUpObject = transformFormDataIntoObject(domElement);
     let callBackDiv  = $('#callback-sign-up-message');
     if(signUpObject.hasOwnProperty('signUpLogin') && signUpObject['signUpLogin'] === ""){
-        displayAlertInDiv("Votre login unique est nécessaire. Veuillez renseigner le champs.",callBackDiv,2000);
+        callBackDiv.displayAlertInDiv("Votre login unique est nécessaire. Veuillez renseigner le champs.",2000);
     }
     else {
         if(signUpObject.hasOwnProperty('signUpPassword') && signUpObject['signUpPassword'] === ""){
-            displayAlertInDiv("Pour des questions de sécurité, votre password est nécessaire. Veuillez renseigner le champs.",callBackDiv,2000);
+            callBackDiv.displayAlertInDiv("Pour des questions de sécurité, votre password est nécessaire. Veuillez renseigner le champs.",2000);
         }
         else {
             $.ajax( {
@@ -78,11 +78,11 @@ function signUp(event,domElement) {
                         $('#sign-up-modal').modal('hide');
                     }
                     else {
-                        displayAlertInDiv(response.error,callBackDiv,1500);
+                        callBackDiv.displayAlertInDiv(response.error,1500);
                     }
                 })
                 .fail(function(){
-                    displayAlertInDiv('Erreur interne. Veuillez contactez un développeur de la plateforme.',callBackDiv,1500);
+                    callBackDiv.displayAlertInDiv('Erreur interne. Veuillez contactez un développeur de la plateforme.',1500);
                 });
         }
     }
@@ -100,11 +100,11 @@ function signIn(event,domElement) {
     let signInObject = transformFormDataIntoObject(domElement);
     let callBackDiv  = $('#callback-sign-in-message');
     if(signInObject.hasOwnProperty('signInLogin') && signInObject['signInLogin'] === "") {
-        displayAlertInDiv("Votre login unique est nécessaire. Veuillez renseigner le champs.",callBackDiv,2000);
+        callBackDiv.displayAlertInDiv("Votre login unique est nécessaire. Veuillez renseigner le champs.",2000);
     }
     else {
         if(signInObject.hasOwnProperty('signInPassword') && signInObject['signInPassword'] === "") {
-            displayAlertInDiv("Pour des questions de sécurité, votre password est nécessaire. Veuillez renseigner le champs.",callBackDiv,2000);
+            callBackDiv.displayAlertInDiv("Pour des questions de sécurité, votre password est nécessaire. Veuillez renseigner le champs.",2000);
         }
         else {
             showLoader();
@@ -119,7 +119,7 @@ function signIn(event,domElement) {
                         location.reload(true);
                     }
                     else {
-                        displayAlertInDiv(response.error,callBackDiv,1500);
+                        callBackDiv.displayAlertInDiv(response.error,1500);
                     }
                 })
                 .fail(function() {
@@ -192,6 +192,8 @@ function searchForTracks(trackName) {
             });
     });
 }
+
+
 
 jQuery.fn.extend({
     /**
@@ -274,6 +276,90 @@ jQuery.fn.extend({
         /** @var {Track} track*/
         searchResults.forEach((track) => {
             self.append(track.toSearchResult());
+        });
+    },
+
+    /**
+     * Met une alerte de danger dans la div courante.
+     *
+     * @param message
+     * @param duration
+     */
+    displayAlertInDiv : function (message,duration) {
+        this.show();
+        this.html(
+            "<div class=\"alert alert-danger\" role=\"alert\">" +
+            message +
+            "</div>");
+        let self = this;
+        setTimeout(function () {
+            let alertCreated = self.find('.alert');
+            alertCreated.remove();
+        },duration);
+    },
+    displayWarningInDiv : function (message,duration) {
+        this.show();
+        this.html(
+            "<div class=\"alert alert-warning\" role=\"alert\">" +
+            message +
+            "</div>");
+        let self = this;
+        setTimeout(function () {
+            self.find('.alert').remove();
+        },duration);
+    },
+    displaySuccessInDiv : function (message,duration) {
+        this.show();
+        this.html(
+            "<div class=\"alert alert-success\" role=\"alert\">" +
+            message +
+            "</div>");
+        let self = this;
+        setTimeout(function () {
+            let alertCreated = self.find('.alert');
+            alertCreated.remove();
+        },duration);
+    },
+    /**
+     * Fonction déclenchée lors de l'envoi d'un formulaire pour créer un nouvelle playlist.
+     */
+    handlePlaylistCreation : function(){
+        let self = this;
+        this.submit(function (e) {
+            e.preventDefault();
+            let newPlaylist = Playlist.get_from_form(self);
+            let playlistCreationMessage = $('#callback-playlist-creation-message');
+
+            if(!newPlaylist.has_all_obligatory_attributes()){
+                playlistCreationMessage.displayAlertInDiv('Nous ne pourrons pas créer de playlist sans nom 🙃. Veuillez en donner un !',3000);
+                return;
+            }
+
+            playlistCreationMessage.insertLoader();
+
+            setTimeout(function () {
+                $.ajax({
+                    url : "Playlist/new_playlist/",
+                    method : 'POST',
+                    data: newPlaylist
+                })
+                    .done((result)=>{
+                        if(typeof result.id === "undefined"){
+                            playlistCreationMessage.displayAlertInDiv("La création de la playlist s'est mal passée. " +
+                                "Veuillez contacter un administrateur de la plateforme.",300);
+                            return;
+                        }
+                        playlistCreationMessage.displaySuccessInDiv("La playlist "+result.name+" a bien été créée.",3000);
+                        self.trigger("reset"); //On reset le formulaire
+                        console.log(result);
+                        self.hideInnerLoader();
+                    })
+                    .fail((result)=>{
+                        playlistCreationMessage.displayAlertInDiv("Erreur critique. Ça sent pas bon pour nous.",300);
+                        console.error(result);
+                        self.hideInnerLoader();
+                    });
+            });
         });
     }
 });

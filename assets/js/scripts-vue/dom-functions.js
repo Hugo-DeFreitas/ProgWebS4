@@ -1,33 +1,4 @@
 /**
- * Met une alerte de danger dans une div donnée.
- *
- * @param message
- * @param callBackDiv
- * @param duration
- */
-function displayAlertInDiv(message,callBackDiv,duration) {
-    callBackDiv.show();
-    callBackDiv.html(
-        "<div class=\"alert alert-danger\" role=\"alert\">" +
-        message +
-        "</div>");
-    setTimeout(function () {
-        callBackDiv.hide();
-    },duration);
-}
-function displayWarningInDiv(message,callBackDiv,duration) {
-    callBackDiv.show();
-    callBackDiv.html(
-        "<div class=\"alert alert-warning\" role=\"alert\">" +
-        message +
-        "</div>");
-    setTimeout(function () {
-        callBackDiv.hide();
-    },duration);
-}
-
-
-/**
  * Fonction permettant d'afficher le loader.
  */
 function showLoader() {$('#loader').modal('show');}
