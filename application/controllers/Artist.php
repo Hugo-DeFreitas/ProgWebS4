@@ -30,7 +30,7 @@ class Artist extends Super_Controller
      */
     public function get_top_artists()
     {
-        $this->send_output_for_rest_api($this->get_api_request('chart.gettopartists'));
+        $this->send_output_for_rest_api($this->get_api_request('chart.gettopartists&country=france'));
     }
 
     /**

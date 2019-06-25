@@ -52,7 +52,7 @@ $userConnected = $user_model;
 </nav>
 <!-- FIN DU HEADER -->
 
-<!-- Zone de recherche pour les artistes, les titres et albums-->
+<!-- Zone des tops Artistes du moment en France-->
 <div class="appearable-zone" id="top-artist-zone">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
@@ -64,11 +64,13 @@ $userConnected = $user_model;
             </div>
             <div class="modal-body">
                 <p class="lead">
-                    Artistes les plus <strong>streamés</strong>.
+                    Qu'écoutent les français ? Découvrez les artistes les plus <strong>streamés</strong> en France.
                 </p>
-                <p class="row" id="display-top-artists">
+                <div class="zone-to-clear">
+                    <p class="row" id="display-top-artists">
 
-                </p>
+                    </p>
+                </div>
             </div>
         </div>
     </div>
@@ -282,6 +284,7 @@ $userConnected = $user_model;
         topArtists.click(()=>{
             getTopArtists();
         });
+
         playlistCreator.prepare($('#playlist-creation-zone'));
         userPlaylists.prepare($('#playlist-search-zone'));
 
@@ -293,6 +296,7 @@ $userConnected = $user_model;
         //On met un timer pour ne pas faire de requêtes AJAX à chaque changement de lettres.
         let typingTimer;
         let timeForUserBeforeAjaxRequest = 1000;
+
         $("#search-for-tracks").keyup(function(){
             let saveContext = $(this);
             let searchZone = $("#search-zone");
