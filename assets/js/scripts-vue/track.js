@@ -1,6 +1,7 @@
 'use strict';
 
 class Track {
+    id; //
     name; //Le nom du titre
     mbid; //L'identifiant du titre
     url; //La page last.fm liée au titre
@@ -17,6 +18,9 @@ class Track {
         if(typeof trackJSON === "object"){
             if(typeof trackJSON.name !== "undefined"){
                 this.name = trackJSON.name;
+            }
+            if(typeof trackJSON.id !== "undefined"){
+                this.id = trackJSON.id;
             }
             if(typeof trackJSON.mbid !== "undefined"){
                 this.mbid = trackJSON.mbid;
@@ -58,12 +62,41 @@ class Track {
         }
     }
 
-    toSearchResult(){
+    addToPlaylist(playlistID){
+        let self =this;
+        console.log("Ajout de '"+this.name+"' à la playlist n°"+playlistID);
+        $.ajax( {
+            url : "Playlist/add_track/"+playlistID+'/',
+            data : self,
+            method : 'POST'
+        })
+            .done(function(result) {
+                if(result.success){
+                    console.log("L'ajout du titre est un succès.");
+                }
+                else {
+                    console.error("Erreur dans l'ajout du titre '"+self.name+"' à la playlist n°"+playlistID+".");
+                }
+            })
+            .fail(function(){
+                console.error("Erreur dans l'ajout du titre '"+self.name+"' à la playlist n°"+playlistID+".");
+            });
+    }
+
+    /**
+     *
+     * @param {Playlist[]}allPlaylistsFromUser
+     * @returns {jQuery|HTMLElement}
+     */
+    toSearchResult(allPlaylistsFromUser){
+        let self = this;
         //Container principal
         let newTrackResult = $("<a/>");
         newTrackResult.attr({
-            href : this.url,
             class : "list-group-item list-group-item-action flex-column align-items-start"
+        });
+        newTrackResult.tooltip({
+            title: 'Cliquer sur l\'image du titre pour l\'ajouter dans une playlist',
         });
         //Container secondaire
         let newTrackResultInnerContainer = $("<div>");
@@ -76,11 +109,41 @@ class Track {
         let newTrackResultColNo1 =   $('<div class="col-3 div-for-track-img">');
 
         //Image de l'album concerné.
-        let trackImage = $("<img class='d-block'>");
+        let trackImage = $("<img class='d-block'/>");
         trackImage.attr({
             id : 'img-for-track-mbid-' + this.mbid,
             class: 'float-left rounded',
-            src : "assets/images/album-img-not-found.png" //Pour l'instant c'est une image standard.
+            src : "assets/images/album-img-not-found.png", //Pour l'instant c'est une image standard.
+            mbid : this.mbid,
+            'data-toggle' : "popover",
+            'data-placement' : "bottom",
+            'title': 'Ajouter le titre à une playlist'
+        });
+
+        trackImage.popover({
+            html:true,
+            content : function () {
+                let divTemp = $('<div/>');
+                divTemp.append('<p><i class="fa fa-info-circle"></i> <em>Cliquer sur une playlist pour l\'ajouter.</em></p>');
+                allPlaylistsFromUser.forEach((playlistFromUser) => {
+                    let newLinkToAddTrackToPlaylist = $('<a style="margin: 10px" data-playlist="'+playlistFromUser.id+'" ' +
+                        'id="btn-add-to-playlist-'+playlistFromUser.id+'" '+
+                        'class="add-track-to-playlist-trigger btn text-white btn-primary"/>');
+                    newLinkToAddTrackToPlaylist.html(playlistFromUser.name);
+
+                    divTemp.append(newLinkToAddTrackToPlaylist);
+                });
+                return divTemp.html();
+            }()
+        });
+
+        trackImage.on('shown.bs.popover', function () {
+            $('.add-track-to-playlist-trigger').click(function(){
+                let savedContext = $(this);
+                let playlistID = savedContext.attr('id').substr(savedContext.attr('id').lastIndexOf('-')+1);
+                self.addToPlaylist(playlistID);
+                savedContext.closest('.popover').popover('hide');
+            });
         });
 
         //On emboite l'élément dans le container
@@ -117,8 +180,6 @@ class Track {
 
         //On ajoute le résultat enfin construit à la liste des résultats
         newTrackResult.append(newTrackResultInnerContainer);
-
-        let self = this; //sauvegarde de contexte pour closure.
 
         //Traitement supplémentaire, pour récupérer plus d'infos sur le titre, mais aussi et surtout l'image de l'album.
         new Promise(function (resolve, reject) {

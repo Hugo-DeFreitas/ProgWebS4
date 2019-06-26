@@ -71,4 +71,74 @@ class Playlist extends Super_Controller {
         }
     }
 
+    public function get_all_from_user($use_public = null){
+        $userData = $this->session->get_userdata();
+
+        $userData = unserialize(serialize($userData['user_connected']));
+
+        $getPublic = $use_public == 'use-public';
+
+        $allPlaylists = $this->playlist_model->get_all();
+        $allPlaylistsFromUser = $this->user_has_playlist_model->find_all_with_param('user_id',$userData->id);
+
+        $allPlaylistsFromUserSorted = array();
+        /** @var Playlist_Model $playlist */
+        foreach ($allPlaylists as $playlist){
+            if ($playlist->is_public == 1 && $getPublic){
+                array_push($allPlaylistsFromUserSorted,$playlist);
+            }
+            else {
+                /** @var User_has_playlist_Model $userHasPlaylist */
+                foreach ($allPlaylistsFromUser as $userHasPlaylist){
+                    if($userHasPlaylist->playlist_id == $playlist->id){
+                        array_push($allPlaylistsFromUserSorted,$playlist);
+                    }
+                }
+            }
+        }
+        /** @var Playlist_Model $aPlaylist */
+        foreach ($allPlaylistsFromUserSorted as $aPlaylist){
+            $aPlaylist->tracks = array();
+            /** @var Playlist_has_track_Model[] $allPlaylistHasTrack */
+            $allPlaylistHasTrack = $this->playlist_has_track_model
+                ->find_all_with_param('playlist_id', $aPlaylist->id);
+            foreach ($allPlaylistHasTrack as $playlist_has_track_Model){
+                $trackFromDB = $this->track_model->get($playlist_has_track_Model->track_id);
+                array_push($aPlaylist->tracks,$trackFromDB);
+            }
+        }
+
+        $this->send_output_for_rest_api($allPlaylistsFromUserSorted);
+    }
+
+    public function add_track($playlistID){
+        $trackData = (object) unserialize(serialize($this->input->post()));
+
+        $result = new stdClass();
+
+        if(!($playlistID)){
+            $result->success = false;
+            $this->send_output_for_rest_api($result);
+            return;
+        }
+
+        $newTrack = new Track_Model();
+        $newTrack->name = $trackData->name;
+        $newTrack->mbid = $trackData->mbid;
+        $newTrack->artist = $trackData->artist ? $trackData->artist['name'] : null;
+        $newTrackID = $newTrack->save();
+
+        $newPlaylistHasTrack = new Playlist_has_track_Model();
+        $newPlaylistHasTrack->track_id = $newTrackID;
+        $newPlaylistHasTrack->playlist_id = $playlistID;
+        $ret = @$newPlaylistHasTrack->save();
+        if(!$ret){
+            $result->success = false;
+        }
+        else{
+            $result->success = true;
+        }
+        $this->send_output_for_rest_api($result);
+        return;
+    }
 }

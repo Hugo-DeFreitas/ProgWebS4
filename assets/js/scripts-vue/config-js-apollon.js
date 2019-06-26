@@ -28,7 +28,7 @@ $(document).ready( function () {
         transition: false,
         timer: false,
         slides: [
-            {src: 'assets/images/apollon-descr-2.jpg'}
+            {src: 'assets/images/top-artists.png'}
         ]
     });
 

@@ -76,8 +76,8 @@ $userConnected = $user_model;
     </div>
 </div>
 
-<!-- Zone de recherche pour les artistes, les titres et albums-->
-<div class="appearable-zone" id="search-zone">
+<!-- Zone de recherche pour les titres -->
+<div class="appearable-zone" id="search-zone-tracks">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -140,7 +140,7 @@ $userConnected = $user_model;
 </div>
 
 <!-- Zone de consultation des playlists de l'utilisateur -->
-<div class="appearable-zone" id="playlist-search-zone">
+<div class="appearable-zone" id="search-zone-playlists">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -153,6 +153,12 @@ $userConnected = $user_model;
                 <p class="lead">
                     Toutes vos <strong>créations</strong>.
                 </p>
+
+                <input name="search-for-playlists" id="search-for-playlists" class="form-control mr-sm-2" type="text" placeholder="Rerchercher des titres." aria-label="search-for-playlists">
+                <!-- Résultats de la recherche -->
+                <div id="results-search-for-playlists" class="list-group">
+
+                </div>
             </div>
         </div>
     </div>
@@ -257,6 +263,7 @@ $userConnected = $user_model;
 <!-- Scripts Bootstrap + Librairies autorisées dans le cadre du projet -->
 <script src="<?php echo base_url('assets/js/jquery-3.3.1.min.js')?>"></script>
 <script src="<?php echo base_url('assets/js/popper.min.js')?>"></script>
+<script src="<?php echo base_url('assets/js/tooltip.min.js')?>"></script>
 <script src="<?php echo base_url('assets/js/bootstrap.min.js')?>"></script>
 <script src="<?php echo base_url('assets/js/vegas/vegas.min.js')?>"></script>
 <!-- Scripts inclus pour la vue -->
@@ -270,55 +277,41 @@ $userConnected = $user_model;
 
 <script>
     $(document).ready(function () {
-        let search          = $('#start-searching-trigger');
-        let topArtists      = $('#top-artists-trigger');
-        let playlistCreator = $('#create-new-playlist-trigger');
-        let userPlaylists   = $('#explore-user-playlist-trigger');
-        let logOutButton    = $('#logout-link');
+        //Zone 'triggers' (zone qui lorsqu'on clique dessus, change l'organisation de la page pour ne faire apparaitre que la partie voulue.
+        let search              = $('#start-searching-trigger');
+        let topArtists          = $('#top-artists-trigger');
+        let playlistCreator     = $('#create-new-playlist-trigger');
+        let userPlaylists       = $('#explore-user-playlist-trigger');
 
+        //Search bars
+        let searchForTracks     = $("#search-for-tracks");
+        let searchForPlaylists  = $("#search-for-playlists");
 
+        //Bouttons d'action
+        let logOutButton        = $('#logout-link');
+
+        //Click sur la déconnexion
         logOutButton.click(logout);
 
-        search.prepare($('#search-zone'));
+        /*
+        Préparation des différentes zones de la page
+         */
+        //Zone des top Artists du moment
         topArtists.prepare($('#top-artist-zone'));
-        topArtists.click(()=>{
-            getTopArtists();
-        });
+        topArtists.click(()=>{getTopArtists();});
 
+        //Zone de recherche
+        search.prepare($('#search-zone-tracks'));
+        searchForTracks.typingInSearchZoneEvent('tracks');
+
+        //Zone de création des playlists
         playlistCreator.prepare($('#playlist-creation-zone'));
-        userPlaylists.prepare($('#playlist-search-zone'));
-
-
         $('#new-playlist-form').handlePlaylistCreation();
 
+        //Zone d'exploration et de sauvegarde des playlists.
+        userPlaylists.prepare($('#search-zone-playlists'));
+        searchForPlaylists.typingInSearchZoneEvent('playlists');
 
-
-        //On met un timer pour ne pas faire de requêtes AJAX à chaque changement de lettres.
-        let typingTimer;
-        let timeForUserBeforeAjaxRequest = 1000;
-
-        $("#search-for-tracks").keyup(function(){
-            let saveContext = $(this);
-            let searchZone = $("#search-zone");
-            let resultsDiv = $('#results-search-for-tracks');
-            let newVal = $(this).val();
-            clearTimeout(typingTimer);
-            //On efface les résultats précédents pour plus de clarté à chaque nouvelle valeur entrée par l'utilisateur.
-            resultsDiv.empty();
-            //On met un loader le temps de la recherche ajax.
-            resultsDiv.insertLoader();
-            typingTimer = setTimeout(function () {
-                //Appel Ajax qui va chercher des titres correspondants.
-                searchForTracks(newVal).then((tracksResults) => {
-                    console.log("Résultats pour la recherche '"+newVal+"' :");
-                    console.log(tracksResults);
-                    //On cache le loader
-                    searchZone.hideInnerLoader();
-                    //On affiche les résultats de la recherche dans la div concernée.
-                    resultsDiv.displaySearchResultsInside(tracksResults);
-                });
-            }, timeForUserBeforeAjaxRequest);
-        });
     });
 </script>
 </body>

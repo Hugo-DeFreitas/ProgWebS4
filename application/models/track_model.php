@@ -6,8 +6,9 @@ class Track_Model extends Super_Model
     const TABLE         = 'track';
 
     public $id;
+    public $name;
+    public $artist;
     public $mbid;
-    public $description;
 
     const MBID     = 'mbid';
 }

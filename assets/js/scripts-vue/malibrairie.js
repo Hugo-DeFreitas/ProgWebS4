@@ -15,7 +15,6 @@ function isConnected(){
         })
             .done(function(response) {
                 //la variable "response" est un bool, renvoyé par le serveur. A la moindre erreur, le serveur renvoie faux.
-                console.log(response);
                 if(response.connection){
                     console.log("L'utilisateur est connecté.");
                     resolve(true);
@@ -73,7 +72,6 @@ function signUp(event,domElement) {
                 }
             })
                 .done(function(response) {
-                    console.log(response);
                     if(response.success){
                         $('#sign-up-modal').modal('hide');
                     }
@@ -228,6 +226,17 @@ function searchForTracks(trackName) {
     });
 }
 
+/**
+ * Renvoit via Promise, les résultats d'une recherche sur un titre musical.
+ * @param getPublic , un booléen qui permet de récupérer toutes les playlists publiques.
+ * @returns {Promise<Playlist[]>}
+ */
+function searchForPlaylists(getPublic){
+    let  resultsDiv = $("#results-search-for-playlists");
+    resultsDiv.empty();
+    return Playlist.get_all_from_user(getPublic);
+}
+
 
 
 jQuery.fn.extend({
@@ -308,9 +317,13 @@ jQuery.fn.extend({
         pour chaque résultat de recherche reçu, des informations concernant l'artiste, le nombre d'auditeurs du titre chaque mois,
         et autre.
         */
-        /** @var {Track} track*/
-        searchResults.forEach((track) => {
-            self.append(track.toSearchResult());
+        Playlist.get_all_from_user().then((allPlaylistsFromUser)=>{
+            console.log("Récupération de toutes les playlists privées de l'utilisateur.");
+            console.log(allPlaylistsFromUser);
+            /** @var {Track|Playlist} track*/
+            searchResults.forEach((result) => {
+                self.append(result.toSearchResult(allPlaylistsFromUser));
+            });
         });
     },
 
@@ -331,6 +344,70 @@ jQuery.fn.extend({
             let alertCreated = self.find('.alert');
             alertCreated.remove();
         },duration);
+    },
+    /**
+     * Fonction qui gère ce qu'il se passe lors de l'écriture dans la barre de recherche des titres.
+     */
+    typingInSearchZoneEvent : function(searchDomain){
+        //On met un timer pour ne pas faire de requêtes AJAX à chaque changement de lettres.
+        let typingTimer;
+        let timeForUserBeforeAjaxRequest = 1000;
+        let self = this;
+
+        //Traitement différent selon le domaine de recherche
+        switch (searchDomain) {
+
+            //Si l'utilisateur veut chercher parmis les titres de la plateforme.
+            case 'tracks':
+                this.keyup(function(){
+                    let searchZone = $("#search-zone-tracks");
+                    let resultsDiv = $('#results-search-for-tracks');
+                    let newVal = $(this).val();
+                    clearTimeout(typingTimer);
+                    //On efface les résultats précédents pour plus de clarté à chaque nouvelle valeur entrée par l'utilisateur.
+                    resultsDiv.empty();
+                    //On met un loader le temps de la recherche ajax.
+                    resultsDiv.insertLoader();
+                    typingTimer = setTimeout(function () {
+                        //Appel Ajax qui va chercher des titres correspondants.
+                        searchForTracks(newVal).then((tracksResults) => {
+                            console.log("Résultats pour la recherche '"+newVal+"' :");
+                            console.log(tracksResults);
+                            //On cache le loader
+                            searchZone.hideInnerLoader();
+                            //On affiche les résultats de la recherche dans la div concernée.
+                            resultsDiv.displaySearchResultsInside(tracksResults);
+                        });
+                    }, timeForUserBeforeAjaxRequest);
+                });
+                break;
+
+            //Si l'utilisateur veut chercher parmis les playlists de la plateforme.
+            case 'playlists':
+                this.keyup(function(){
+                    let searchZone = $("#search-zone-playlists");
+                    let resultsDiv = $('#results-search-for-playlists');
+                    let newVal = $(this).val();
+                    clearTimeout(typingTimer);
+                    //On efface les résultats précédents pour plus de clarté à chaque nouvelle valeur entrée par l'utilisateur.
+                    resultsDiv.empty();
+                    //On met un loader le temps de la recherche ajax.
+                    resultsDiv.insertLoader();
+                    typingTimer = setTimeout(function () {
+                        //Appel Ajax qui va chercher des titres correspondants.
+                        searchForPlaylists(newVal).then((playlistsResults) => {
+                            console.log("Résultats pour la recherche '"+newVal+"' :");
+                            console.log(playlistsResults);
+                            //On cache le loader
+                            searchZone.hideInnerLoader();
+                            //On affiche les résultats de la recherche dans la div concernée.
+                            resultsDiv.displaySearchResultsInside(playlistsResults);
+                        });
+                    }, timeForUserBeforeAjaxRequest);
+                });
+                break;
+        }
+
     },
     displayWarningInDiv : function (message,duration) {
         this.show();
