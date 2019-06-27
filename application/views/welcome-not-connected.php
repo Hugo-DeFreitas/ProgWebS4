@@ -204,7 +204,7 @@
                         <textarea name="signUpUserBio" class="form-control" id="sign-up-user-bio" rows="3" placeholder="Une courte description?"></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="sign-up-user-pp">Bio</label>
+                        <label for="sign-up-user-pp">Photo de profil</label>
                         <input name="signUpUserPP" class="form-control" id="sign-up-user-pp" placeholder="L'URL de votre photo de profil.">
                     </div>
                     <div id="callback-sign-up-message">

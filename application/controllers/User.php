@@ -96,18 +96,8 @@ class User extends Super_Controller
                 $newUser->picture_profile_url = $postData->signUpUserPP ? $postData->signUpUserPP : User_Model::DEFAULT_PP;
                 $newUser->id = @$newUser->save();
 
-                //On lie l'utilisateur à un rôle simple
-                $insertRoleForUser = new User_has_role_Model();
-                $insertRoleForUser->role_id = User_has_role_Model::SIMPLE_USER_ROLE;
-                $insertRoleForUser->user_id = $newUser->id;
-                if(@$insertRoleForUser->save()){
-                    $result->success = true;
-                    $this->login($newUser);
-                }
-                else{
-                    $result->error = "Erreur interne. L'inscription est momentanément indisponible.";
-                }
-
+                $this->login($newUser);
+                $result->success = true;
             }
             else{
                 $result->error = 'Les mots de passes ne concordent pas.';

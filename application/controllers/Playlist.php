@@ -71,12 +71,33 @@ class Playlist extends Super_Controller {
         }
     }
 
-    public function get_all_from_user($use_public = null){
+    public function get_all(){
+        $allPlaylists = $this->playlist_model->get_all();
+        $allPlaylistsPublic = array();
+        foreach ($allPlaylists as $playlist) {
+            if ($playlist->is_public == 1) {
+                array_push($allPlaylistsPublic, $playlist);
+            }
+        }
+
+        foreach ($allPlaylistsPublic as $aPlaylist){
+            $aPlaylist->tracks = array();
+            /** @var Playlist_has_track_Model[] $allPlaylistHasTrack */
+            $allPlaylistHasTrack = $this->playlist_has_track_model
+                ->find_all_with_param('playlist_id', $aPlaylist->id);
+            foreach ($allPlaylistHasTrack as $playlist_has_track_Model){
+                $trackFromDB = $this->track_model->get($playlist_has_track_Model->track_id);
+                array_push($aPlaylist->tracks,$trackFromDB);
+            }
+        }
+
+        $this->send_output_for_rest_api($allPlaylistsPublic);
+    }
+
+    public function get_all_from_user(){
         $userData = $this->session->get_userdata();
 
         $userData = unserialize(serialize($userData['user_connected']));
-
-        $getPublic = $use_public == 'use-public';
 
         $allPlaylists = $this->playlist_model->get_all();
         $allPlaylistsFromUser = $this->user_has_playlist_model->find_all_with_param('user_id',$userData->id);
@@ -84,15 +105,10 @@ class Playlist extends Super_Controller {
         $allPlaylistsFromUserSorted = array();
         /** @var Playlist_Model $playlist */
         foreach ($allPlaylists as $playlist){
-            if ($playlist->is_public == 1 && $getPublic){
-                array_push($allPlaylistsFromUserSorted,$playlist);
-            }
-            else {
-                /** @var User_has_playlist_Model $userHasPlaylist */
-                foreach ($allPlaylistsFromUser as $userHasPlaylist){
-                    if($userHasPlaylist->playlist_id == $playlist->id){
-                        array_push($allPlaylistsFromUserSorted,$playlist);
-                    }
+            /** @var User_has_playlist_Model $userHasPlaylist */
+            foreach ($allPlaylistsFromUser as $userHasPlaylist){
+                if($userHasPlaylist->playlist_id == $playlist->id){
+                    array_push($allPlaylistsFromUserSorted,$playlist);
                 }
             }
         }

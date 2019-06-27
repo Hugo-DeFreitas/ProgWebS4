@@ -14,8 +14,6 @@ class User_Model extends Super_Model
     public $bio;
     public $picture_profile_url;
 
-    public $playlists;
-
     const FIRST_NAME    = 'first_name';
     const LAST_NAME     = 'last_name';
     const LOGIN         = 'login';

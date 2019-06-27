@@ -35,20 +35,34 @@ class Welcome extends Super_Controller {
     }
 
     public function index()
-	{
-	    $this->data->session_data = $this->session->get_userdata();
-	    if(isset($this->data->session_data['user_connected'])){
-	        /** @var User_Model $user*/
-	        $user = unserialize(serialize($this->data->session_data['user_connected']));
-	        $this->data->user_model = $user;
-	        $joinPlaylists= $this->user_has_playlist_model->find_all_with_param(User_has_playlist_Model::USER_ID,$user->id);
-	        $playlistsFromUser = array();
-	        foreach ($joinPlaylists as $userHasPlaylistRow){
-	            $currentPlaylist = $this->playlist_model
+    {
+        $this->data->session_data = $this->session->get_userdata();
+        if(isset($this->data->session_data['user_connected'])){
+            /** @var User_Model $user*/
+            $user = unserialize(serialize($this->data->session_data['user_connected']));
+            $this->data->user_model = $user;
+            $joinPlaylists= $this->user_has_playlist_model->find_all_with_param(User_has_playlist_Model::USER_ID,$user->id);
+            $playlistsFromUser = array();
+            foreach ($joinPlaylists as $userHasPlaylistRow){
+                $currentPlaylist = $this->playlist_model
                     ->find_with_param(Playlist_Model::PRIMARY_KEY,$userHasPlaylistRow->playlist_id);
-	            array_push($playlistsFromUser,$currentPlaylist);
+
+                array_push($playlistsFromUser,$currentPlaylist);
             }
-            $this->data->playlists_from_user = $playlistsFromUser;
+
+            /** @var Playlist_Model $playlistToAddTracks */
+            foreach ($playlistsFromUser as $playlistToAddTracks){
+                $playlistToAddTracks->tracks = array();
+                /** @var Playlist_has_track_Model[] $allPlaylistHasTrack */
+                $allPlaylistHasTrack = $this->playlist_has_track_model
+                    ->find_all_with_param('playlist_id', $playlistToAddTracks->id);
+                foreach ($allPlaylistHasTrack as $playlist_has_track_Model){
+                    $trackFromDB = $this->track_model->get($playlist_has_track_Model->track_id);
+                        array_push($playlistToAddTracks->tracks,$trackFromDB);
+                }
+            }
+
+            $this->data->playlists_from_user = $playlistsFromUser ? $playlistsFromUser : array();
             $this->data->is_connected = $this->is_connected;
             $this->load->view('welcome-connected',$this->data);
         }

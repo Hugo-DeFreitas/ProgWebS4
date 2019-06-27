@@ -74,6 +74,7 @@ function signUp(event,domElement) {
                 .done(function(response) {
                     if(response.success){
                         $('#sign-up-modal').modal('hide');
+                        location.reload(true);
                     }
                     else {
                         callBackDiv.displayAlertInDiv(response.error,1500);
@@ -226,18 +227,6 @@ function searchForTracks(trackName) {
     });
 }
 
-/**
- * Renvoit via Promise, les résultats d'une recherche sur un titre musical.
- * @param getPublic , un booléen qui permet de récupérer toutes les playlists publiques.
- * @returns {Promise<Playlist[]>}
- */
-function searchForPlaylists(getPublic){
-    let  resultsDiv = $("#results-search-for-playlists");
-    resultsDiv.empty();
-    return Playlist.get_all_from_user(getPublic);
-}
-
-
 
 jQuery.fn.extend({
     /**
@@ -320,11 +309,29 @@ jQuery.fn.extend({
         Playlist.get_all_from_user().then((allPlaylistsFromUser)=>{
             console.log("Récupération de toutes les playlists privées de l'utilisateur.");
             console.log(allPlaylistsFromUser);
-            /** @var {Track|Playlist} track*/
+            /** @var {Track} result*/
             searchResults.forEach((result) => {
                 self.append(result.toSearchResult(allPlaylistsFromUser));
             });
         });
+    },
+
+    /**
+     * Permet d'afficher les résultats d'une recherche de playlist dans une div.
+     * @param {Playlist[]} searchResults, un tableau avec les résultats attendus
+     */
+    displayPlaylistResultsInside : function(searchResults) {
+        this.empty();
+        if(!searchResults || searchResults.length === 0){
+            console.log("Aucun résultat reçu.");
+            let errorMessage = "<div class='lead text-center'><p class='text-warning'>Aucun résultat connu pour cette recherche.</p></div>";
+            this.append(errorMessage);
+            return;
+        }
+
+        let self  = this;//Sauvegarde du contexte
+
+        console.log(searchResults);
     },
 
     /**
@@ -395,13 +402,11 @@ jQuery.fn.extend({
                     resultsDiv.insertLoader();
                     typingTimer = setTimeout(function () {
                         //Appel Ajax qui va chercher des titres correspondants.
-                        searchForPlaylists(newVal).then((playlistsResults) => {
+                        Playlist.browse(newVal).then((playlistsResults) => {
                             console.log("Résultats pour la recherche '"+newVal+"' :");
                             console.log(playlistsResults);
                             //On cache le loader
                             searchZone.hideInnerLoader();
-                            //On affiche les résultats de la recherche dans la div concernée.
-                            resultsDiv.displaySearchResultsInside(playlistsResults);
                         });
                     }, timeForUserBeforeAjaxRequest);
                 });

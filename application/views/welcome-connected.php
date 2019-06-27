@@ -30,24 +30,6 @@ $userConnected = $user_model;
         <a href="" id="logout-link" class="py-2 d-md-inline-block">
             Déconnexion
         </a>
-        <li class="nav-item dropleft" style="list-style: none;">
-            <a class="nav-item nav-link dropdown-toggle mr-md-2" href="" id="playlists-from-user-id-<?= $userConnected->id?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Playlists
-            </a>
-            <div class="dropdown-menu dropdown-menu-right">
-                <?php
-                if($playlists_from_user){
-                    foreach ($playlists_from_user as $playlist){
-                        ?>
-                        <a class="dropdown-item" id="dropdown-item-with-playlist-id-<?= $playlist->id?>">
-                            <i class="fa fa-play-circle text-primary"></i>&nbsp;<?= $playlist->name ?>
-                        </a>
-                        <?php
-                    }
-                }
-                ?>
-            </div>
-        </li>
     </div>
 </nav>
 <!-- FIN DU HEADER -->
@@ -151,14 +133,25 @@ $userConnected = $user_model;
             </div>
             <div class="modal-body">
                 <p class="lead">
-                    Toutes vos <strong>créations</strong>.
+                    Explorer les playlists des <strong>autres utilisateurs</strong>.
                 </p>
 
-                <input name="search-for-playlists" id="search-for-playlists" class="form-control mr-sm-2" type="text" placeholder="Rerchercher des titres." aria-label="search-for-playlists">
+                <input name="search-for-playlists" id="search-for-playlists"
+                       class="form-control mr-sm-2" type="text"
+                       placeholder="Rerchercher des playlists."
+                       aria-label="search-for-playlists" style="margin-bottom: 30px">
+
                 <!-- Résultats de la recherche -->
                 <div id="results-search-for-playlists" class="list-group">
 
                 </div>
+
+                <p class="lead">
+                    Toutes vos <strong>créations</strong>.
+                </p>
+
+                <div class="accordion" id="acccordion-for-user-playlists"></div>
+
             </div>
         </div>
     </div>
@@ -334,6 +327,7 @@ $userConnected = $user_model;
         //Zone d'exploration et de sauvegarde des playlists.
         userPlaylists.prepare($('#search-zone-playlists'));
         searchForPlaylists.typingInSearchZoneEvent('playlists');
+        userPlaylists.click(Playlist.loadUserPlaylists()());
 
     });
 </script>
