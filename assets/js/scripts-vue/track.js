@@ -65,22 +65,19 @@ class Track {
     addToPlaylist(playlistID){
         let self =this;
         console.log("Ajout de '"+this.name+"' à la playlist n°"+playlistID);
-        $.ajax( {
-            url : "Playlist/add_track/"+playlistID+'/',
-            data : self,
-            method : 'POST'
-        })
-            .done(function(result) {
-                if(result.success){
-                    console.log("L'ajout du titre est un succès.");
-                }
-                else {
-                    console.error("Erreur dans l'ajout du titre '"+self.name+"' à la playlist n°"+playlistID+".");
-                }
+        return new Promise((resolve)=>{
+            $.ajax( {
+                url : "Playlist/add_track/"+playlistID+'/',
+                data : self,
+                method : 'POST'
             })
-            .fail(function(){
-                console.error("Erreur dans l'ajout du titre '"+self.name+"' à la playlist n°"+playlistID+".");
-            });
+                .done(function(result) {
+                    resolve(result.success); //Le serveur peut renvoyer uniquement vrai ou faux.
+                })
+                .fail(function(){
+                    resolve(false);
+                });
+        });
     }
 
     /**
@@ -141,7 +138,19 @@ class Track {
             $('.add-track-to-playlist-trigger').click(function(){
                 let savedContext = $(this);
                 let playlistID = savedContext.attr('id').substr(savedContext.attr('id').lastIndexOf('-')+1);
-                self.addToPlaylist(playlistID);
+                self.addToPlaylist(playlistID).then((success)=>{
+                    if(success){
+                        let successNotification =  $('#modal-track-added-to-playlist').modal('show');
+                        successNotification.find('.card-body').html(
+                            '<h2 class="text-center">Le titre '+self.name+' a bien été ajouté à la playlist d\'ID n°'+playlistID+'.</h2>'
+                        );
+                    }
+                    else {
+                        let errorNotification =  $('#modal-track-added-to-playlist').modal('show');
+                        errorNotification.find('.card-body').html(
+                            '<h2 class="text-center text-danger">Le titre '+self.name+' a bien été ajouté à la playlist d\'ID n°'+playlistID+'.</h2>'
+                        );                    }
+                });
                 savedContext.closest('.popover').popover('hide');
             });
         });

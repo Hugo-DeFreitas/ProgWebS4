@@ -260,6 +260,29 @@ $userConnected = $user_model;
     </div>
 </div>
 
+<div class="modal fade" id="modal-track-added-to-playlist" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Notification</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-img">
+                        <img class="card-img" id="title-added-image" src="assets/images/vinyl-skate.png">
+                    </div>
+                    <div class="card-body">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Scripts Bootstrap + Librairies autorisées dans le cadre du projet -->
 <script src="<?php echo base_url('assets/js/jquery-3.3.1.min.js')?>"></script>
 <script src="<?php echo base_url('assets/js/popper.min.js')?>"></script>
