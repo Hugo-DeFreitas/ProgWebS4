@@ -1,3 +1,6 @@
+/**
+ * FICHIER DE CONFIGURATION DE LA LIBRAIRIE VEGAS.
+ */
 $(document).ready( function () {
     //Configuration de Vegas pour une jolie page d'accueil (slider).
     $("#landing-message-vegas").vegas({

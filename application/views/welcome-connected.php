@@ -24,7 +24,7 @@ $userConnected = $user_model;
 
     <div id="header-for-connected-user"
          class="container d-flex flex-column flex-md-row justify-content-between">
-        <a class="py-2" href="#">
+        <a id="header-user-connected" class="py-2" href="#" data-toggle="tooltip" data-placement="bottom" data-title="<?= $userConnected->bio ?>">
             <?= $userConnected->first_name?> <?= $userConnected->last_name?>
         </a>
         <a href="" id="logout-link" class="py-2 d-md-inline-block">
@@ -146,7 +146,7 @@ $userConnected = $user_model;
 
                 </div>
 
-                <p class="lead">
+                <p class="lead" style="margin-top: 20px">
                     Toutes vos <strong>créations</strong>.
                 </p>
 
@@ -158,7 +158,9 @@ $userConnected = $user_model;
 </div>
 
 <div id="main">
-
+    <div class="d-md-flex flex-md-equal w-100 my-md-3 pl-md-3">
+        <h1 class="modal-title mb-0 text-center">Bienvenue <strong><?= $userConnected->first_name?></strong>.</h1>
+    </div>
     <div class="d-md-flex flex-md-equal w-100 my-md-3 pl-md-3">
         <!-- Div sur les artistes en tendance -->
         <button class="bg-dark mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center text-white overflow-hidden"
@@ -284,15 +286,17 @@ $userConnected = $user_model;
 <script src="<?php echo base_url('assets/js/vegas/vegas.min.js')?>"></script>
 <!-- Scripts inclus pour la vue -->
 <script src="<?php echo base_url('assets/js/scripts-vue/config-js-apollon.js')?>"></script>
+<script src="<?php echo base_url('assets/js/scripts-vue/malibrairie.js')?>"></script>
+<script src="<?php echo base_url('assets/js/scripts-vue/connect.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/artist.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/album.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/track.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/playlist.js')?>"></script>
-<script src="<?php echo base_url('assets/js/scripts-vue/malibrairie.js')?>"></script>
-<script src="<?php echo base_url('assets/js/scripts-vue/dom-functions.js')?>"></script>
 
 <script>
     $(document).ready(function () {
+        $('#header-user-connected').tooltip();
+
         //Zone 'triggers' (zone qui lorsqu'on clique dessus, change l'organisation de la page pour ne faire apparaitre que la partie voulue.
         let search              = $('#start-searching-trigger');
         let topArtists          = $('#top-artists-trigger');
@@ -307,14 +311,14 @@ $userConnected = $user_model;
         let logOutButton        = $('#logout-link');
 
         //Click sur la déconnexion
-        logOutButton.click(logout);
+        logOutButton.click(Connect.logout);
 
         /*
         Préparation des différentes zones de la page
          */
         //Zone des top Artists du moment
         topArtists.prepare($('#top-artist-zone'));
-        topArtists.click(()=>{getTopArtists();});
+        topArtists.click(()=>{Artist.getTopArtists();});
 
         //Zone de recherche
         search.prepare($('#search-zone-tracks'));
@@ -327,8 +331,10 @@ $userConnected = $user_model;
         //Zone d'exploration et de sauvegarde des playlists.
         userPlaylists.prepare($('#search-zone-playlists'));
         searchForPlaylists.typingInSearchZoneEvent('playlists');
-        userPlaylists.click(Playlist.loadUserPlaylists()());
+        userPlaylists.click(Playlist.loadUserPlaylists);
 
+        //On check toutes les 5 secondes si on est connecté.
+        Connect.isConnected();
     });
 </script>
 </body>

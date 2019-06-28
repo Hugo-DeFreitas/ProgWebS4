@@ -122,15 +122,20 @@ class Track {
             content : function () {
                 let divTemp = $('<div/>');
                 divTemp.append('<p><i class="fa fa-info-circle"></i> <em>Cliquer sur une playlist pour l\'ajouter.</em></p>');
-                allPlaylistsFromUser.forEach((playlistFromUser) => {
-                    let newLinkToAddTrackToPlaylist = $('<a style="margin: 10px" data-playlist="'+playlistFromUser.id+'" ' +
-                        'id="btn-add-to-playlist-'+playlistFromUser.id+'" '+
-                        'class="add-track-to-playlist-trigger btn text-white btn-primary"/>');
-                    newLinkToAddTrackToPlaylist.html(playlistFromUser.name);
+                if(allPlaylistsFromUser.length !== 0){
+                    allPlaylistsFromUser.forEach((playlistFromUser) => {
+                        let newLinkToAddTrackToPlaylist = $('<a style="margin: 10px" data-playlist="'+playlistFromUser.id+'" ' +
+                            'id="btn-add-to-playlist-'+playlistFromUser.id+'" '+
+                            'class="add-track-to-playlist-trigger btn text-white btn-primary"/>');
+                        newLinkToAddTrackToPlaylist.html(playlistFromUser.name);
 
-                    divTemp.append(newLinkToAddTrackToPlaylist);
-                });
-                return divTemp.html();
+                        divTemp.append(newLinkToAddTrackToPlaylist);
+                    });
+                    return divTemp.html();
+                }
+                else {
+                    return '<em>Créez une playlist pour pouvoir ajouter des titres.</em>';
+                }
             }()
         });
 
@@ -225,5 +230,37 @@ class Track {
         });
 
         return newTrackResult;
+    }
+
+    /**
+     * Renvoit via Promise, les résultats d'une recherche sur un titre musical.
+     * @param trackName
+     * @returns {Promise<any>}
+     */
+    static searchForTracks(trackName) {
+        let  resultsDiv = $("#results-search-for-tracks");
+        resultsDiv.empty();
+        return new Promise(function (resolve, reject) {
+            $.ajax( {
+                url : "Track/search_track/"+trackName,
+                method : 'POST',
+            })
+                .done(function(tracks) {
+                    if(tracks){
+                        let trackObjectsArray = [];
+                        tracks.results.trackmatches.track.forEach((trackJSON)=>{
+                            trackObjectsArray.push(new Track(trackJSON));
+                        });
+                        resolve(trackObjectsArray);
+                    }
+                    else {
+                        resolve(false);
+                    }
+                })
+                .fail(function(){
+                    resolve(false);
+                    resultsDiv.empty();
+                });
+        });
     }
 }

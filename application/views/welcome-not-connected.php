@@ -1,9 +1,3 @@
-<?php
-/**
- * @var User_Model $userConnected
- * @var Playlist_Model[] $playlists_from_user
- */
-?>
 <!doctype html>
 <html lang="fr">
 <head>
@@ -233,22 +227,24 @@
 <!-- Scripts inclus pour la vue -->
 <script src="<?php echo base_url('assets/js/scripts-vue/config-js-apollon.js')?>"></script>
 <script src="<?php echo base_url('assets/js/scripts-vue/malibrairie.js')?>"></script>
-<script src="<?php echo base_url('assets/js/scripts-vue/dom-functions.js')?>"></script>
+<script src="<?php echo base_url('assets/js/scripts-vue/connect.js')?>"></script>
 
 <script>
     $(document).ready(function () {
+        let signInForm = $('#sign-in-form');
+        let signUpForm = $('#sign-up-form');
         /**
          * Gestion de la connexion en Ajax
          */
-        $('#sign-in-form').on('submit', function(e) {
-            signIn(e,this);
+        signInForm.on('submit',(e)=>{
+            Connect.signIn(e,signInForm[0]);
         });
 
         /**
          * Gestion de l'inscription en Ajax.
          */
-        $('#sign-up-form').on('submit', function(e) {
-            signUp(e,this);
+        signUpForm.on('submit',(e)=>{
+            Connect.signUp(e,signUpForm[0]);
         });
 
     });

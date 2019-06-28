@@ -1,5 +1,8 @@
 'use strict';
 
+/**
+ * Classe Album.
+ */
 class Album {
     name; //Le nom de l'album
     mbid; //L'identifiant du titre

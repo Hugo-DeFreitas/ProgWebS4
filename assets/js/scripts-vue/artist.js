@@ -194,4 +194,53 @@ class Artist {
         });
     }
 
+    /**
+     * Affiche des bouttons à propos des topArtists.
+     */
+    static getTopArtists() {
+        let topArtistZone = $("#top-artist-zone");
+        let modalTopArtistBody = topArtistZone.find(".zone-to-clear");
+        modalTopArtistBody.empty();
+        //On clear la zone pour éviter la duplication si l'utilisateur fait des "va-et-vient" vers ce menu.
+        Artist.get_top_artists().then((allTopArtists) => {
+            let highRankedArtistRow = $('<div class="text-center" />');
+            let lowRankedArtistRow = $('<div id="other-top-artist-row" class="text-center" />');
+            lowRankedArtistRow.append('<h2>' +
+                '🏅&nbsp;Les autres' +
+                '</h2>');
+            for (let i = 0; i < allTopArtists.length; i++){
+                /** @var {Artist} currentTopArtist*/
+                let currentTopArtist = allTopArtists[i];
+                let topArtistBtn = currentTopArtist.toButton(i+1);
+                switch (i+1) {
+                    case 1:
+                        highRankedArtistRow.append('<h2>' +
+                            '🥇&nbsp;Première place' +
+                            '</h2>');
+                        highRankedArtistRow.append(topArtistBtn);
+                        modalTopArtistBody.append(highRankedArtistRow);
+                        break;
+                    case 2:
+                        highRankedArtistRow.append('<h2>' +
+                            '🥈&nbsp;Deuxième place' +
+                            '</h2>');
+                        highRankedArtistRow.append(topArtistBtn);
+                        modalTopArtistBody.append(highRankedArtistRow);
+                        break;
+                    case 3:
+                        highRankedArtistRow.append('<h2>' +
+                            '🥉&nbsp;Troisième place' +
+                            '</h2>');
+                        highRankedArtistRow.append(topArtistBtn);
+                        modalTopArtistBody.append(highRankedArtistRow);
+                        break;
+                    default:
+                        lowRankedArtistRow.append(topArtistBtn);
+                        break;
+                }
+            }
+            modalTopArtistBody.append(lowRankedArtistRow)
+        });
+    }
+
 }

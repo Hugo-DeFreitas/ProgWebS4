@@ -66,23 +66,26 @@ class Playlist {
     static get_all_from_user(getPublic = false){
         return new Promise(function (resolve, reject) {
             $.ajax( {
-                url : "Playlist/get_all_from_user/"+(getPublic ? '' : 'use-public'),
+                url : "Playlist/get_all_from_user/"
             })
+                /** @var {[]}playlists */
                 .done(function(playlists) {
-                    if(playlists){
+                    if(playlists && typeof playlists === "object"){
                         let castPlaylists = [];
-                        playlists.forEach((playlistFromServer)=>{
-                            let newPlaylist = new Playlist();
-                            newPlaylist.id      = playlistFromServer.id;
-                            newPlaylist.name    = playlistFromServer.name;
-                            newPlaylist.description = playlistFromServer.description;
-                            newPlaylist.is_public   = (playlistFromServer.is_public == "1");
-                            playlistFromServer.tracks.forEach((track)=> {
-                                newPlaylist.tracks.push(new Track(track));
+                        if(playlists.length !== 0){
+                            playlists.forEach((playlistFromServer)=>{
+                                let newPlaylist = new Playlist();
+                                newPlaylist.id      = playlistFromServer.id;
+                                newPlaylist.name    = playlistFromServer.name;
+                                newPlaylist.description = playlistFromServer.description;
+                                newPlaylist.is_public   = (playlistFromServer.is_public == "1");
+                                playlistFromServer.tracks.forEach((track)=> {
+                                    newPlaylist.tracks.push(new Track(track));
+                                });
+                                castPlaylists.push(newPlaylist)
                             });
-                            castPlaylists.push(newPlaylist)
-                        });
-                        resolve(castPlaylists);
+                            resolve(castPlaylists);
+                        }
                     }
                     else {
                         resolve(false);
@@ -95,15 +98,19 @@ class Playlist {
     }
 
     static loadUserPlaylists(){
-        return ()=>{
-            /** @var {Playlist[]} playlists */
-            Playlist.get_all_from_user().then((playlists)=>{
-                let accordionOfUserPlaylist = $('#acccordion-for-user-playlists');
+        let accordionOfUserPlaylist = $('#acccordion-for-user-playlists');
+        accordionOfUserPlaylist.empty();
+        /** @var {Playlist[]} playlists */
+        Playlist.get_all_from_user().then((playlists)=>{
+            if(playlists){
                 playlists.forEach((playlist)=>{
                     accordionOfUserPlaylist.append(playlist.toItem());
                 });
-            })
-        };
+            }
+            else {
+                accordionOfUserPlaylist.append('<em>Vous n\'avez pas encore créé de playlists.</em>');
+            }
+        })
     }
 
     toItem (){
@@ -180,5 +187,13 @@ class Playlist {
                 resolve(arrayFiltered);
             })
         });
+    }
+
+    static displaySearchResults(resultsDiv,arrayOfPlaylists){
+        if(arrayOfPlaylists.length !== 0){
+            arrayOfPlaylists.forEach((playlist)=>{
+                resultsDiv.append(playlist.toItem());
+            });
+        }
     }
 }

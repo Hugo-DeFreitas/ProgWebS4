@@ -47,14 +47,6 @@ class Playlist extends Super_Controller {
 
         $newPlaylistID = $newPlaylist->insert();
 
-        if($newPlaylistData->is_public == 'true'){
-            $result->playlist = $newPlaylist;
-            $result->success = true;
-            $this->db->trans_complete();
-            $this->send_output_for_rest_api($newPlaylist);
-            return;
-        }
-
         $newPlaylistHasUser = new User_has_playlist_Model();
 
         $newPlaylistHasUser->user_id = $userData->id;
@@ -102,29 +94,34 @@ class Playlist extends Super_Controller {
         $allPlaylists = $this->playlist_model->get_all();
         $allPlaylistsFromUser = $this->user_has_playlist_model->find_all_with_param('user_id',$userData->id);
 
-        $allPlaylistsFromUserSorted = array();
-        /** @var Playlist_Model $playlist */
-        foreach ($allPlaylists as $playlist){
-            /** @var User_has_playlist_Model $userHasPlaylist */
-            foreach ($allPlaylistsFromUser as $userHasPlaylist){
-                if($userHasPlaylist->playlist_id == $playlist->id){
-                    array_push($allPlaylistsFromUserSorted,$playlist);
+        if($allPlaylistsFromUser){
+            $allPlaylistsFromUserSorted = array();
+            /** @var Playlist_Model $playlist */
+            foreach ($allPlaylists as $playlist){
+                /** @var User_has_playlist_Model $userHasPlaylist */
+                foreach ($allPlaylistsFromUser as $userHasPlaylist){
+                    if($userHasPlaylist->playlist_id == $playlist->id){
+                        array_push($allPlaylistsFromUserSorted,$playlist);
+                    }
                 }
             }
-        }
-        /** @var Playlist_Model $aPlaylist */
-        foreach ($allPlaylistsFromUserSorted as $aPlaylist){
-            $aPlaylist->tracks = array();
-            /** @var Playlist_has_track_Model[] $allPlaylistHasTrack */
-            $allPlaylistHasTrack = $this->playlist_has_track_model
-                ->find_all_with_param('playlist_id', $aPlaylist->id);
-            foreach ($allPlaylistHasTrack as $playlist_has_track_Model){
-                $trackFromDB = $this->track_model->get($playlist_has_track_Model->track_id);
-                array_push($aPlaylist->tracks,$trackFromDB);
+            /** @var Playlist_Model $aPlaylist */
+            foreach ($allPlaylistsFromUserSorted as $aPlaylist){
+                $aPlaylist->tracks = array();
+                /** @var Playlist_has_track_Model[] $allPlaylistHasTrack */
+                $allPlaylistHasTrack = $this->playlist_has_track_model
+                    ->find_all_with_param('playlist_id', $aPlaylist->id);
+                foreach ($allPlaylistHasTrack as $playlist_has_track_Model){
+                    $trackFromDB = $this->track_model->get($playlist_has_track_Model->track_id);
+                    array_push($aPlaylist->tracks,$trackFromDB);
+                }
             }
+            $this->send_output_for_rest_api($allPlaylistsFromUserSorted);
+        }
+        else{
+            echo json_encode(array());
         }
 
-        $this->send_output_for_rest_api($allPlaylistsFromUserSorted);
     }
 
     public function add_track($playlistID){

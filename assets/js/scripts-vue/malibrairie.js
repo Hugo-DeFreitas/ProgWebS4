@@ -1,233 +1,3 @@
-/**
- * ===============
- * Fonctions liées à la gestion des utilisateurs.
- * ===============
- */
-
-/**
- * Permet de savoir si l'utilisateur est connecté ou non.
- */
-function isConnected(){
-    return new Promise(function (resolve, reject) {
-        $.ajax( {
-            url : "User/is_connected/",
-            method : 'POST',
-        })
-            .done(function(response) {
-                //la variable "response" est un bool, renvoyé par le serveur. A la moindre erreur, le serveur renvoie faux.
-                if(response.connection){
-                    console.log("L'utilisateur est connecté.");
-                    resolve(true);
-                }
-                else {
-                    console.log("L'utilisateur n'est pas connecté.");
-                    resolve(false);
-                }
-
-            })
-            .fail(function(){
-                alert('Erreur interne critique.');
-                resolve(false);
-            });
-    });
-}
-
-/**
- * Renvoie un objet JSON à partir d'un formulaire, qui contiendra la valeur des inputs.
- * @param formData
- */
-function transformFormDataIntoObject(formData){
-    let signInObject = {};
-    let signInFormData = new FormData(formData);
-    for (const [key, value]  of signInFormData.entries()) {
-        signInObject[key] = value;
-    }
-    return signInObject;
-}
-
-/**
- * Gestion de l'inscription
- * @param event
- * @param domElement
- */
-function signUp(event,domElement) {
-    //On empêche l'envoi du formulaire vers le serveur
-    event.preventDefault();
-    //On récupère les données du formulaire dans un objet JSON.
-    let signUpObject = transformFormDataIntoObject(domElement);
-    let callBackDiv  = $('#callback-sign-up-message');
-    if(signUpObject.hasOwnProperty('signUpLogin') && signUpObject['signUpLogin'] === ""){
-        callBackDiv.displayAlertInDiv("Votre login unique est nécessaire. Veuillez renseigner le champs.",2000);
-    }
-    else {
-        if(signUpObject.hasOwnProperty('signUpPassword') && signUpObject['signUpPassword'] === ""){
-            callBackDiv.displayAlertInDiv("Pour des questions de sécurité, votre password est nécessaire. Veuillez renseigner le champs.",2000);
-        }
-        else {
-            $.ajax( {
-                url : "User/try_inscription/",
-                method : 'POST',
-                data : {
-                    signUpData : signUpObject
-                }
-            })
-                .done(function(response) {
-                    if(response.success){
-                        $('#sign-up-modal').modal('hide');
-                        location.reload(true);
-                    }
-                    else {
-                        callBackDiv.displayAlertInDiv(response.error,1500);
-                    }
-                })
-                .fail(function(){
-                    callBackDiv.displayAlertInDiv('Erreur interne. Veuillez contactez un développeur de la plateforme.',1500);
-                });
-        }
-    }
-}
-
-/**
- * Gestion de la connexion
- * @param event
- * @param domElement
- */
-function signIn(event,domElement) {
-    //On empêche l'envoi du formulaire vers le serveur
-    event.preventDefault();
-    //On récupère les données du formulaire dans un objet JSON.
-    let signInObject = transformFormDataIntoObject(domElement);
-    let callBackDiv  = $('#callback-sign-in-message');
-    if(signInObject.hasOwnProperty('signInLogin') && signInObject['signInLogin'] === "") {
-        callBackDiv.displayAlertInDiv("Votre login unique est nécessaire. Veuillez renseigner le champs.",2000);
-    }
-    else {
-        if(signInObject.hasOwnProperty('signInPassword') && signInObject['signInPassword'] === "") {
-            callBackDiv.displayAlertInDiv("Pour des questions de sécurité, votre password est nécessaire. Veuillez renseigner le champs.",2000);
-        }
-        else {
-            showLoader();
-            $.ajax({
-                url : "User/try_connection/" + signInObject.signInLogin + "/" +signInObject.signInPassword,
-                method : 'POST'})
-                .done(function(response) {
-                    console.log(response);
-                    hideLoader();
-                    if(response.connection){
-                        $('#sign-in-modal').modal('hide');
-                        location.reload(true);
-                    }
-                    else {
-                        callBackDiv.displayAlertInDiv(response.error,1500);
-                    }
-                })
-                .fail(function() {
-                    displayWarningInDiv('Erreur interne. Veuillez contactez un développeur de la plateforme.',callBackDiv,1500);
-                });
-        }
-    }
-}
-
-/**
- * Gestion de la déconnexion
- */
-function logout() {
-    return new Promise((resolve, reject) => {
-        $.ajax( {
-            url : "User/logout/",
-            method : 'POST'
-        }).done((result) => {
-            resolve(result);
-            console.log("Déconnexion de l'utilisateur.");
-        }).fail(()=>{
-            alert('Une erreur est survenue sur le serveur lors de la déconnexion.');
-        });
-    });
-}
-
-/**
- * Affiche des bouttons à propos des topArtists.
- */
-function getTopArtists() {
-    let topArtistZone = $("#top-artist-zone");
-    let modalTopArtistBody = topArtistZone.find(".zone-to-clear");
-    modalTopArtistBody.empty();
-    //On clear la zone pour éviter la duplication si l'utilisateur fait des "va-et-vient" vers ce menu.
-    Artist.get_top_artists().then((allTopArtists) => {
-        let highRankedArtistRow = $('<div class="text-center" />');
-        let lowRankedArtistRow = $('<div id="other-top-artist-row" class="text-center" />');
-        lowRankedArtistRow.append('<h2>' +
-            '🏅&nbsp;Les autres' +
-            '</h2>');
-        for (let i = 0; i < allTopArtists.length; i++){
-            /** @var {Artist} currentTopArtist*/
-            let currentTopArtist = allTopArtists[i];
-            let topArtistBtn = currentTopArtist.toButton(i+1);
-            switch (i+1) {
-                case 1:
-                    highRankedArtistRow.append('<h2>' +
-                        '🥇&nbsp;Première place' +
-                        '</h2>');
-                    highRankedArtistRow.append(topArtistBtn);
-                    modalTopArtistBody.append(highRankedArtistRow);
-                    break;
-                case 2:
-                    highRankedArtistRow.append('<h2>' +
-                        '🥈&nbsp;Deuxième place' +
-                        '</h2>');
-                    highRankedArtistRow.append(topArtistBtn);
-                    modalTopArtistBody.append(highRankedArtistRow);
-                    break;
-                case 3:
-                    highRankedArtistRow.append('<h2>' +
-                        '🥉&nbsp;Troisième place' +
-                        '</h2>');
-                    highRankedArtistRow.append(topArtistBtn);
-                    modalTopArtistBody.append(highRankedArtistRow);
-                    break;
-                default:
-                    lowRankedArtistRow.append(topArtistBtn);
-                    break;
-            }
-        }
-        modalTopArtistBody.append(lowRankedArtistRow)
-    });
-}
-
-
-/**
- * Renvoit via Promise, les résultats d'une recherche sur un titre musical.
- * @param trackName
- * @returns {Promise<any>}
- */
-function searchForTracks(trackName) {
-    let  resultsDiv = $("#results-search-for-tracks");
-    resultsDiv.empty();
-    return new Promise(function (resolve, reject) {
-        $.ajax( {
-            url : "Track/search_track/"+trackName,
-            method : 'POST',
-        })
-            .done(function(tracks) {
-                if(tracks){
-                    let trackObjectsArray = [];
-                    tracks.results.trackmatches.track.forEach((trackJSON)=>{
-                        trackObjectsArray.push(new Track(trackJSON));
-                    });
-                    resolve(trackObjectsArray);
-                }
-                else {
-                    resolve(false);
-                }
-            })
-            .fail(function(){
-                resolve(false);
-                resultsDiv.empty();
-            });
-    });
-}
-
-
 jQuery.fn.extend({
     /**
      * Fonction qui permet de faire des apparitions/disparitions dynamiques sur la div passée en paramètres.
@@ -377,7 +147,7 @@ jQuery.fn.extend({
                     resultsDiv.insertLoader();
                     typingTimer = setTimeout(function () {
                         //Appel Ajax qui va chercher des titres correspondants.
-                        searchForTracks(newVal).then((tracksResults) => {
+                        Track.searchForTracks(newVal).then((tracksResults) => {
                             console.log("Résultats pour la recherche '"+newVal+"' :");
                             console.log(tracksResults);
                             //On cache le loader
@@ -407,6 +177,7 @@ jQuery.fn.extend({
                             console.log(playlistsResults);
                             //On cache le loader
                             searchZone.hideInnerLoader();
+                            Playlist.displaySearchResults(resultsDiv,playlistsResults);
                         });
                     }, timeForUserBeforeAjaxRequest);
                 });
@@ -480,3 +251,21 @@ jQuery.fn.extend({
         });
     }
 });
+
+/**
+ * Fonction permettant d'afficher le loader.
+ */
+function showLoader() {$('#loader').modal('show');}
+
+/**
+ * Fonction permettant d'enlever le loader (de force), car il s'agit d'un bug sur la librairie Bootstrap.
+ */
+function hideLoader() {
+    let loader = $("#loader");
+    let body = $('body');
+    loader.removeClass("in");
+    $(".modal-backdrop").remove();
+    body.removeClass('modal-open');
+    body.css('padding-right', '');
+    loader.hide();
+}
