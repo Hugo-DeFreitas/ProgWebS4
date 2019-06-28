@@ -122,7 +122,8 @@ class Track {
             content : function () {
                 let divTemp = $('<div/>');
                 divTemp.append('<p><i class="fa fa-info-circle"></i> <em>Cliquer sur une playlist pour l\'ajouter.</em></p>');
-                if(allPlaylistsFromUser.length !== 0){
+                console.log(typeof allPlaylistsFromUser);
+                if(typeof allPlaylistsFromUser === "object"){
                     allPlaylistsFromUser.forEach((playlistFromUser) => {
                         let newLinkToAddTrackToPlaylist = $('<a style="margin: 10px" data-playlist="'+playlistFromUser.id+'" ' +
                             'id="btn-add-to-playlist-'+playlistFromUser.id+'" '+

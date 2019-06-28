@@ -239,7 +239,6 @@ jQuery.fn.extend({
                         }
                         playlistCreationMessage.displaySuccessInDiv("La playlist "+result.name+" a bien été créée.",3000);
                         self.trigger("reset"); //On reset le formulaire
-                        console.log(result);
                         self.hideInnerLoader();
                     })
                     .fail((result)=>{
